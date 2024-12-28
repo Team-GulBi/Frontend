@@ -8,11 +8,13 @@ import {
 import { useEffect, useState } from 'react';
 import { ReactComponent as Dropdown } from '@/assets/svgs/dropdown.svg';
 import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
+import useGetBCategories, { Category } from '@/apis/useGetBCategories';
+import useGetMCategories from '@/apis/useGetMCategories';
 
 export const CategoryDropdowns = () => {
-  const [categories, setCategories] = useState<string[]>([]);
-  const [subCategories, setSubCategories] = useState<string[]>([]);
-  const [minorCategories, setMinorCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subCategories, setSubCategories] = useState<Category[]>([]);
+  const [minorCategories, setMinorCategories] = useState<Category[]>([]);
 
   const [selectedMainCategory, setSelectedMainCategory] =
     useState('대분류 선택');
@@ -20,29 +22,37 @@ export const CategoryDropdowns = () => {
   const [selectedMinorCategory, setSelectedMinorCategory] =
     useState('소분류 선택');
 
-  // 대분류 목록 api 요청
-  const fetchCategories = async () => {
-    const mainCategoryData = ['가전제품']; // 나중에 api 요청
-    setCategories(mainCategoryData);
-  };
-
-  // 중분류 목록 api 요청
-  const fetchSubCategories = async (mainCategory: string) => {
-    const subCategoryData =
-      mainCategory === '가전제품' ? ['냉장고', '세탁기'] : [];
-    setSubCategories(subCategoryData);
-  };
-
-  // 소분류 목록 api 요청
-  const fetchMinorCategories = async (subCategory: string) => {
-    const minorCategoryData =
-      subCategory === '냉장고' ? ['미니 냉장고', '양문형 냉장고'] : [];
-    setMinorCategories(minorCategoryData);
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+    const fetchCategories = async () => {
+      try {
+        const response = await useGetBCategories();
+        setCategories(response.data);
+      } catch (error) {
+        console.error('대분류 조회 실패:', error);
+      }
+    };
+  
+    const fetchSubCategories = async (mainCategoryId: number) => {
+      try {
+        const response = await useGetMCategories(mainCategoryId.toString());
+        setSubCategories(response.data);
+      } catch (error) {
+        console.error('중분류 조회 실패:', error);
+      }
+    };
+  
+    const fetchMinorCategories = async (subCategoryId: number) => {
+      try {
+        const response = await useGetMCategories(subCategoryId.toString());
+        setMinorCategories(response.data);
+      } catch (error) {
+        console.error('소분류 조회 실패:', error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchCategories();
+    }, []);
+  
 
   return (
     <div className="flex flex-col gap-4 px-[1rem]">
@@ -57,17 +67,17 @@ export const CategoryDropdowns = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <DropdownMenuItem
-                key={index}
+                key={category.id}
                 onClick={() => {
-                  setSelectedMainCategory(category);
+                  setSelectedMainCategory(category.name);
                   setSelectedSubCategory('중분류 선택');
                   setSelectedMinorCategory('소분류 선택');
-                  fetchSubCategories(category);
+                  fetchSubCategories(category.id);
                 }}
               >
-                {category}
+                {category.name}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -84,16 +94,16 @@ export const CategoryDropdowns = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
-            {subCategories.map((subCategory, index) => (
+            {subCategories.map((subCategory) => (
               <DropdownMenuItem
-                key={index}
+                key={subCategory.id}
                 onClick={() => {
-                  setSelectedSubCategory(subCategory);
+                  setSelectedSubCategory(subCategory.name);
                   setSelectedMinorCategory('소분류 선택');
-                  fetchMinorCategories(subCategory);
+                  fetchMinorCategories(subCategory.id);
                 }}
               >
-                {subCategory}
+                {subCategory.name}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -110,12 +120,12 @@ export const CategoryDropdowns = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
-            {minorCategories.map((minorCategory, index) => (
+            {minorCategories.map((minorCategory) => (
               <DropdownMenuItem
-                key={index}
-                onClick={() => setSelectedMinorCategory(minorCategory)}
+                key={minorCategory.id}
+                onClick={() => setSelectedMinorCategory(minorCategory.name)}
               >
-                {minorCategory}
+                {minorCategory.name}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
