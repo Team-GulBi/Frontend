@@ -24,6 +24,7 @@ const SignupPage = () => {
     name: '',
     id: '',
     password: '',
+    phone: '',
   });
 
   const { showError, validateCheckboxes } = useSignupValidation(
@@ -57,14 +58,15 @@ const SignupPage = () => {
               Yajoba에 오신 것을 환영해요!
             </span>
           </div>
-          <div className="flex w-4/5 flex-col gap-[0.8rem]">
-            <div className="flex flex-col gap-[0.4rem]">
+          <div className={`flex w-4/5 flex-col ${showError.nameError && showError.idError && showError.passwordError && showError.phoneError === true ? "gap-[0.1rem]" : "gap-[0.8rem]"}`}> 
+          {/* 이름~전화번호 모두 에러뜨면 에러메시지 아래 gap을 0.1rem으로 줄이고, 나머지 경우에는 gap이 추가로 각각 적용되어있기 때문에 거기서 따로 에러메시지 위 gap을 0.3rem으로 컨트롤함(그럴경우 자동으로 아래 gap은 0.8rem 됨)->나중에 봐서 수정하든지 하면 좋을듯*/}
+            <div className={`flex flex-col  ${showError.nameError === true ? "gap-[0.3rem]" : ""}`}>
               <input
                 name="name"
                 value={fields.name}
                 onChange={handleChange}
                 placeholder="이름을 입력해주세요"
-                className="rounded-xs border border-neutral-80 bg-primary-0 p-3 text-small16 text-neutral-0"
+                className="rounded-xs border border-neutral-80 bg-primary-0 p-1.5 text-small16 text-neutral-0 placeholder:text-sm"
               />
               {showError.nameError && (
                 <span className="text-xxsmall12 text-error">
@@ -73,13 +75,13 @@ const SignupPage = () => {
               )}
             </div>
 
-            <div className="flex flex-col gap-[0.4rem]">
+            <div className={`flex flex-col  ${showError.idError === true ? "gap-[0.3rem]" : ""}`}>
               <input
                 name="id"
                 value={fields.id}
                 onChange={handleChange}
                 placeholder="아이디를 입력해주세요"
-                className="rounded-xs border border-neutral-80 bg-primary-0 p-3 text-small16 text-neutral-0"
+                className="rounded-xs border border-neutral-80 bg-primary-0 p-1.5 text-small16 text-neutral-0 placeholder:text-sm"
               />
               {showError.idError && (
                 <span className="text-xxsmall12 text-error">
@@ -88,13 +90,13 @@ const SignupPage = () => {
               )}
             </div>
 
-            <div className="flex flex-col gap-[0.4rem]">
+            <div className={`flex flex-col  ${showError.passwordError === true ? "gap-[0.3rem]" : ""}`}>
               <input
                 name="password"
                 value={fields.password}
                 onChange={handleChange}
                 placeholder="비밀번호를 입력해주세요"
-                className="rounded-xs border border-neutral-80 bg-primary-0 p-3 text-small16 text-neutral-0"
+                className="rounded-xs border border-neutral-80 bg-primary-0 p-1.5 text-small16 text-neutral-0 placeholder:text-sm"
               />
               {showError.passwordError && (
                 <span className="text-xxsmall12 text-error">
@@ -102,10 +104,25 @@ const SignupPage = () => {
                 </span>
               )}
             </div>
+            <div className={`flex flex-col  ${showError.phoneError === true ? "gap-[0.3rem]" : ""}`}>
+            <input
+              name="phone"
+              type="tel"
+              value={fields.phone}
+              onChange={handleChange}
+              placeholder="휴대폰 번호 입력 ('-' 제외 11자리 입력)"
+              className=" rounded-xs border border-neutral-80 bg-primary-0 p-1.5 text-small16 text-neutral-0 placeholder:text-sm"
+            />
+            {showError.phoneError && (
+              <span className="text-xxsmall12 text-error">
+                * 전화번호는 11자리 숫자로 입력해 주세요.
+              </span>
+            )}
+            </div>
           </div>
           <div className="flex flex-col gap-[1rem]">
             <AllCheckbox allChecked={allChecked} toggleAll={toggleAll} />
-            <div className="flex flex-col gap-[0.5rem]">
+            <div className={`flex flex-col  ${showError.checkboxError === true ? "gap-[0.3rem]" : "gap-[0.5rem"}`}>
               {checkboxes.map((checkbox, index) => (
                 <Checkbox
                   key={index}
