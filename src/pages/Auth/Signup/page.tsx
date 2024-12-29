@@ -3,8 +3,14 @@ import { LoginHeader } from '@/components/common/Header';
 import { AllCheckbox, Checkbox } from '@/components/Auth/SignupCheckbox';
 import { useCheckboxGroup } from '@/hooks/utils/useCheckboxGroup';
 import { useSignupValidation } from '@/hooks/utils/useSignupValidation';
+import  signup  from '@/apis/signup';
+import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
+  const navigate = useNavigate(); // 회원가입 성공 후 페이지 이동을 위해 사용
+  const [errorMessage, setErrorMessage] = useState(''); 
+
+
   const { checkboxes, toggleAll, toggleCheckbox, allChecked } =
     useCheckboxGroup([
       { label: '[필수] 개인회원 약관에 동의', checked: false, required: true },
@@ -39,12 +45,41 @@ const SignupPage = () => {
     });
   };
 
-  const handleSignup = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (!validateCheckboxes()) {
-      e.preventDefault();
-    }
-  };
 
+  const handleSignup = async (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+
+    if (!validateCheckboxes()) {
+      setErrorMessage('* 필수 항목에 동의해 주세요.');
+      return;
+    }
+
+    if (showError.nameError || showError.idError || showError.passwordError || showError.phoneError) {
+      setErrorMessage('* 입력 정보를 다시 확인해 주세요.');
+      return;
+    }
+
+    try {
+      setErrorMessage('');
+      
+      // requestbody 데이터 치환
+    const requestData = {
+      nickname: fields.name, // name을 nickname으로 바꿔서보냄
+      email: fields.id,      // id를 email로 바꿔서보냄
+      password: fields.password,
+      phoneNumber: fields.phone,
+    };
+      // 회원가입 API 호출
+      const response = await signup(requestData);
+
+      console.log('Signup success:', response);
+      alert('회원가입에 성공했습니다!');
+      navigate('/login'); // 회원가입 성공 시 로그인 페이지로 이동
+    } catch (error) {
+      console.error('Signup failed:', error);
+      alert('회원가입에 실패했습니다!')
+    } 
+  };
   return (
     <div className="flex h-screen w-screen">
       <LoginHeader />
@@ -59,7 +94,8 @@ const SignupPage = () => {
             </span>
           </div>
           <div className={`flex w-4/5 flex-col ${showError.nameError && showError.idError && showError.passwordError && showError.phoneError === true ? "gap-[0.1rem]" : "gap-[0.8rem]"}`}> 
-          {/* 이름~전화번호 모두 에러뜨면 에러메시지 아래 gap을 0.1rem으로 줄이고, 나머지 경우에는 gap이 추가로 각각 적용되어있기 때문에 거기서 따로 에러메시지 위 gap을 0.3rem으로 컨트롤함(그럴경우 자동으로 아래 gap은 0.8rem 됨)->나중에 봐서 수정하든지 하면 좋을듯*/}
+          {/* 이름~전화번호 모두 에러뜨면 에러메시지 아래 gap->0.1rem, 
+          나머지 경우에는 각각 0.3rem으로 설정->현재 최선인듯 ..*/}
             <div className={`flex flex-col  ${showError.nameError === true ? "gap-[0.3rem]" : ""}`}>
               <input
                 name="name"
@@ -164,7 +200,7 @@ const SignupPage = () => {
             로그인 하러 가기
           </a>
         </div>
-      </div>
+      </div>   
     </div>
   );
 };

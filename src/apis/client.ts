@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const client = axios.create({
-  baseURL: process.env.YAJOBA_SEVER_URL,
+  baseURL: import.meta.env.VITE_YAJOBA_SEVER_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
