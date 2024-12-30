@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
   const navigate = useNavigate(); // 회원가입 성공 후 페이지 이동을 위해 사용
-  const [errorMessage, setErrorMessage] = useState(''); 
 
 
   const { checkboxes, toggleAll, toggleCheckbox, allChecked } =
@@ -48,20 +47,13 @@ const SignupPage = () => {
 
   const handleSignup = async (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();
-
     if (!validateCheckboxes()) {
-      setErrorMessage('* 필수 항목에 동의해 주세요.');
       return;
     }
-
     if (showError.nameError || showError.idError || showError.passwordError || showError.phoneError) {
-      setErrorMessage('* 입력 정보를 다시 확인해 주세요.');
       return;
     }
-
     try {
-      setErrorMessage('');
-      
       // requestbody 데이터 치환
     const requestData = {
       nickname: fields.name, // name을 nickname으로 바꿔서보냄
@@ -71,14 +63,13 @@ const SignupPage = () => {
     };
       // 회원가입 API 호출
       const response = await signup(requestData);
-
       console.log('Signup success:', response);
       alert('회원가입에 성공했습니다!');
       navigate('/login'); // 회원가입 성공 시 로그인 페이지로 이동
     } catch (error) {
       console.error('Signup failed:', error);
       alert('회원가입에 실패했습니다!')
-    } 
+    }
   };
   return (
     <div className="flex h-screen w-screen">
