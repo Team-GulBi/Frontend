@@ -10,6 +10,7 @@ interface SignupFields {
   name: string;
   id: string;
   password: string;
+  phone: string;
 }
 
 export const useSignupValidation = (
@@ -21,6 +22,7 @@ export const useSignupValidation = (
     nameError: false,
     idError: false,
     passwordError: false,
+    phoneError: false
   });
 
   const validateCheckboxes = () => {
@@ -32,14 +34,17 @@ export const useSignupValidation = (
     const idError = fields.id.length < 8;
     const passwordError =
       fields.password.length < 8 ||
-      !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/.test(fields.password);
+      !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]*$/.test(fields.password);
+    const phoneRegex = /^010\d{8}$/;
+    const phoneError = !phoneRegex.test(fields.phone);
 
-    if (requiredUnchecked || nameError || idError || passwordError) {
+    if (requiredUnchecked || nameError || idError || passwordError || phoneError) {
       setShowError({
         checkboxError: requiredUnchecked,
         nameError,
         idError,
         passwordError,
+        phoneError,
       });
       return false;
     }
@@ -49,6 +54,7 @@ export const useSignupValidation = (
       nameError: false,
       idError: false,
       passwordError: false,
+      phoneError: false,
     });
     return true;
   };

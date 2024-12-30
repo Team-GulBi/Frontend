@@ -55,21 +55,6 @@ const OnboardingPage = () => {
             )}
             </div>
 
-            <div className="flex flex-col gap-[0.4rem]">
-            <input
-              name="phone"
-              type="tel"
-              value={fields.phone}
-              onChange={handleChange}
-              placeholder="휴대폰 번호 입력 ('-' 제외 11자리 입력)"
-              className="w-1/3 rounded-xs border border-neutral-80 bg-primary-0 p-3 text-small16 text-neutral-0"
-            />
-            {showError.phoneError && (
-              <span className="text-xxsmall12 text-error">
-                * 전화번호는 11자리 숫자로 입력해 주세요.
-              </span>
-            )}
-            </div>
 
             <div className="flex flex-col gap-[0.4rem]">
             <div className="flex items-center gap-[0.75rem]">
