@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_YAJOBA_SEVER_URL,
@@ -9,7 +9,13 @@ const client = axios.create({
 });
 
 client.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
+    config.withCredentials = true;
+    const token = localStorage.getItem('token'); 
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -20,11 +26,17 @@ client.interceptors.request.use(
 
 client.interceptors.response.use(
   (res) => {
+    if (res.data.refreshed) {
+      const new_Token = res.headers["authorization"];
+      localStorage.setItem("accessToken", new_Token);
+    }
     return res;
   },
-  (error) => {
-    console.error('Response error:', error);
-    return Promise.reject(error);
+  (error) => {if (error.response?.status === 401) {
+    localStorage.clear();
+    window.location.replace("/"); // 401 뜨면 메인페이지로 이동
+  }
+  return Promise.reject(error);
   },
 );
 
