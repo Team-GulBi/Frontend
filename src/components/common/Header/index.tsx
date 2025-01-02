@@ -11,6 +11,14 @@ import { useActiveLink } from '@/hooks/utils/useActiveLink';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
+const handleRedirect = (url: string) => {
+  const isLoggedIn = Boolean(localStorage.getItem('token')); // 버튼 클릭시 token 유무로 로그인 상태 확인
+  if (isLoggedIn) {
+    window.location.href = url; // 로그인 상태면 해당 URL로 이동
+  } else {
+    window.location.href = '/login'; // 로그아웃 상태면 /login으로 이동
+  }
+};
 export const HeaderWithSearch = () => {
   const isProductPage = useActiveLink('/product');
   const isChatPage = useActiveLink('/chat');
@@ -88,7 +96,7 @@ export const HeaderWithSearch = () => {
         <div className="flex items-center justify-center gap-[1.75rem]">
           <a
             className={`flex cursor-pointer items-center gap-2 text-medium18 font-semibold ${isProductPage ? 'text-primary-dark' : 'text-neutral-10'}`}
-            href="/product"
+            onClick={() => handleRedirect('/product')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -110,7 +118,7 @@ export const HeaderWithSearch = () => {
 
           <a
             className={`flex cursor-pointer items-center gap-2 text-medium18 font-semibold ${isChatPage ? 'text-primary-dark' : 'text-neutral-10'}`}
-            href="/chat"
+            onClick={() => handleRedirect('/chat')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +140,7 @@ export const HeaderWithSearch = () => {
 
           <a
             className={`flex cursor-pointer items-center gap-2 text-medium18 font-semibold ${isMypage ? 'text-primary-dark' : 'text-neutral-10'}`}
-            href="/profile"
+            onClick={() => handleRedirect('/profile')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -173,7 +181,7 @@ export const HeaderWithoutSearch = () => {
         <div className="flex items-center justify-center gap-[1.75rem]">
           <a
             className={`flex cursor-pointer items-center gap-2 text-medium18 font-semibold ${isProductPage ? 'text-primary-dark' : 'text-neutral-10'}`}
-            href="/product"
+            onClick={() => handleRedirect('/product')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -195,7 +203,7 @@ export const HeaderWithoutSearch = () => {
 
           <a
             className={`flex cursor-pointer items-center gap-2 text-medium18 font-semibold ${isChatPage ? 'text-primary-dark' : 'text-neutral-10'}`}
-            href="/chat"
+            onClick={() => handleRedirect('/chat')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -217,7 +225,7 @@ export const HeaderWithoutSearch = () => {
 
           <a
             className={`flex cursor-pointer items-center gap-2 text-medium18 font-semibold ${isMypage ? 'text-primary-dark' : 'text-neutral-10'}`}
-            href="/profile"
+            onClick={() => handleRedirect('/profile')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

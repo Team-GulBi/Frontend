@@ -1,9 +1,10 @@
+import { useEffect, useState } from 'react';
 import { ReactComponent as Puzzle } from '@/assets/svgs/puzzle.svg';
 import product1 from '@/assets/images/product1.jpeg';
 import product2 from '@/assets/images/product2.jpeg';
 import product3 from '@/assets/images/product3.jpeg';
 import product4 from '@/assets/images/product4.jpeg';
-import { HeaderWithSearch } from '@/components/common/Header';
+import { HeaderWithSearch, LoginHeader} from '@/components/common/Header';
 import { ProductCard } from '@/components/common/ProductCard';
 
 const products = [
@@ -30,9 +31,16 @@ const products = [
 ];
 
 const MainPage = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // 로그인 상태
+   // 컴포넌트 마운트 시 token 확인
+   useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token); // token이 있으면 true, 없으면 false로 설정함
+  }, []);
+  
   return (
     <div className="min-h-screen flex max-w-screen flex-col">
-      <HeaderWithSearch />
+      {isLoggedIn ? <HeaderWithSearch /> : <LoginHeader />}
       <div className="mb-7 flex w-full justify-center pt-[75px]">
         <div className="flex h-[244px] w-full rounded-[10px] bg-secondary-70 shadow-lg">
           <Puzzle className="z-60 mr-[400px] rounded-[10px]" />
