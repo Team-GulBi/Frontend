@@ -11,7 +11,18 @@ import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
 import useGetBCategories, { Category } from '@/apis/useGetBCategories';
 import useGetMCategories from '@/apis/useGetMCategories';
 
-export const CategoryDropdowns = () => {
+
+interface CategoryDropdownsProps {
+  setBCategoryId: (id: number) => void;
+  setMCategoryId: (id: number) => void;
+  setSCategoryId: (id: number) => void;
+}
+
+export const CategoryDropdowns = ({
+  setBCategoryId,
+  setMCategoryId,
+  setSCategoryId,
+}: CategoryDropdownsProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<Category[]>([]);
   const [minorCategories, setMinorCategories] = useState<Category[]>([]);
@@ -22,14 +33,11 @@ export const CategoryDropdowns = () => {
   const [selectedMinorCategory, setSelectedMinorCategory] =
     useState('소분류 선택');
 
-    const fetchCategories = async () => {
-      try {
-        const response = await useGetBCategories();
-        setCategories(response.data);
-      } catch (error) {
-        console.error('대분류 조회 실패:', error);
-      }
-    };
+    useEffect(() => {
+      useGetBCategories()
+        .then((response) => setCategories(response.data))
+        .catch((error) => console.error('대분류 조회 실패:', error));
+    }, []);
   
     const fetchSubCategories = async (mainCategoryId: number) => {
       try {
@@ -48,89 +56,89 @@ export const CategoryDropdowns = () => {
         console.error('소분류 조회 실패:', error);
       }
     };
+
+    return (
+      <div className="flex flex-col gap-4 px-[1rem]">
+        <span className="text-medium18 text-neutral-0">상품 카테고리</span>
+        <div className="flex flex-wrap items-center gap-2 md:gap-4 lg:gap-8">
+          {/* 대분류 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="font-regular flex min-w-[180px] items-center justify-between border border-neutral-80 bg-neutral-100 px-8 py-6 text-medium20 text-neutral-40">
+                <span>{selectedMainCategory}</span>
+                <Dropdown className="self-center pt-[2px]" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
+              {categories.map((category) => (
+                <DropdownMenuItem
+                  key={category.id}
+                  onClick={() => {
+                    setSelectedMainCategory(category.name);
+                    setSelectedSubCategory('중분류 선택');
+                    setSelectedMinorCategory('소분류 선택');
+                    setBCategoryId(category.id);
+                    fetchSubCategories(category.id);
+                  }}
+                >
+                  {category.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
   
-    useEffect(() => {
-      fetchCategories();
-    }, []);
+          <RightArray />
   
-
-  return (
-    <div className="flex flex-col gap-4 px-[1rem]">
-      <span className="text-medium18 text-neutral-0">상품 카테고리</span>
-      <div className="flex flex-wrap items-center gap-2 md:gap-4 lg:gap-8">
-        {/* 대분류 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="font-regular flex min-w-[180px] items-center justify-between border border-neutral-80 bg-neutral-100 px-8 py-6 text-medium20 text-neutral-40">
-              <span>{selectedMainCategory}</span>
-              <Dropdown className="self-center pt-[2px]" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
-            {categories.map((category) => (
-              <DropdownMenuItem
-                key={category.id}
-                onClick={() => {
-                  setSelectedMainCategory(category.name);
-                  setSelectedSubCategory('중분류 선택');
-                  setSelectedMinorCategory('소분류 선택');
-                  fetchSubCategories(category.id);
-                }}
-              >
-                {category.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <RightArray />
-
-        {/* 중분류 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="font-regular flex min-w-[180px] items-center justify-between border border-neutral-80 bg-neutral-100 px-8 py-6 text-medium20 text-neutral-40">
-              <span>{selectedSubCategory}</span>
-              <Dropdown className="self-center pt-[2px]"/>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
-            {subCategories.map((subCategory) => (
-              <DropdownMenuItem
-                key={subCategory.id}
-                onClick={() => {
-                  setSelectedSubCategory(subCategory.name);
-                  setSelectedMinorCategory('소분류 선택');
-                  fetchMinorCategories(subCategory.id);
-                }}
-              >
-                {subCategory.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <RightArray />
-
-        {/* 소분류 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="font-regular flex min-w-[180px] items-center justify-between border border-neutral-80 bg-neutral-100 px-8 py-6 text-medium20 text-neutral-40">
-              <span>{selectedMinorCategory}</span>
-              <Dropdown className="self-center pt-[2px]"/>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
-            {minorCategories.map((minorCategory) => (
-              <DropdownMenuItem
-                key={minorCategory.id}
-                onClick={() => setSelectedMinorCategory(minorCategory.name)}
-              >
-                {minorCategory.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* 중분류 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="font-regular flex min-w-[180px] items-center justify-between border border-neutral-80 bg-neutral-100 px-8 py-6 text-medium20 text-neutral-40">
+                <span>{selectedSubCategory}</span>
+                <Dropdown className="self-center pt-[2px]"/>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
+              {subCategories.map((subCategory) => (
+                <DropdownMenuItem
+                  key={subCategory.id}
+                  onClick={() => {
+                    setSelectedSubCategory(subCategory.name);
+                    setSelectedMinorCategory('소분류 선택');
+                    setMCategoryId(subCategory.id);
+                    fetchMinorCategories(subCategory.id);
+                  }}
+                >
+                  {subCategory.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+  
+          <RightArray />
+  
+          {/* 소분류 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="font-regular flex min-w-[180px] items-center justify-between border border-neutral-80 bg-neutral-100 px-8 py-6 text-medium20 text-neutral-40">
+                <span>{selectedMinorCategory}</span>
+                <Dropdown className="self-center pt-[2px]"/>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-neutral-100 py-4 text-medium18 font-light text-neutral-30">
+              {minorCategories.map((minorCategory) => (
+                <DropdownMenuItem
+                  key={minorCategory.id}
+                  onClick={() => {
+                    setSelectedMinorCategory(minorCategory.name);
+                    setSCategoryId(minorCategory.id);
+                  }}
+                >
+                  {minorCategory.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };

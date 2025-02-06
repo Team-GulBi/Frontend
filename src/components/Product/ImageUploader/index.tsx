@@ -6,24 +6,29 @@ import { ReactComponent as Plus } from '@/assets/svgs/plus.svg';
 interface ImageUploaderProps {
   maxImages?: number;
   onImagesChange: (newImages: string[]) => void;
+  onMainImageChange?: (file: File | null) => void;
 }
 
 export const ImageUploader = ({
   maxImages = 10,
   onImagesChange,
+  onMainImageChange,
 }: ImageUploaderProps) => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      const newImages = Array.from(files).map((file) =>
-        URL.createObjectURL(file),
-      );
+      const newImages = Array.from(files).map((file) => URL.createObjectURL(file));
+      
       if (uploadedImages.length + newImages.length <= maxImages) {
         const updatedImages = [...uploadedImages, ...newImages];
         setUploadedImages(updatedImages);
         onImagesChange(updatedImages);
+  
+        if (onMainImageChange) {
+          onMainImageChange(files[0]);
+        }
       }
     }
   };
