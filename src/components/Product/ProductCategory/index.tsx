@@ -16,12 +16,18 @@ interface CategoryDropdownsProps {
   setBCategoryId: (id: number) => void;
   setMCategoryId: (id: number) => void;
   setSCategoryId: (id: number) => void;
+  initialBCategoryId?: number;
+  initialMCategoryId?: number;
+  initialSCategoryId?: number;
 }
 
 export const CategoryDropdowns = ({
   setBCategoryId,
   setMCategoryId,
   setSCategoryId,
+  initialBCategoryId,
+  initialMCategoryId,
+  initialSCategoryId,
 }: CategoryDropdownsProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<Category[]>([]);
@@ -39,6 +45,38 @@ export const CategoryDropdowns = ({
         .catch((error) => console.error('대분류 조회 실패:', error));
     }, []);
   
+    useEffect(() => {
+      if (initialBCategoryId) {
+        const selectedCategory = categories.find((c) => c.id === initialBCategoryId);
+        if (selectedCategory) {
+          setSelectedMainCategory(selectedCategory.name);
+          setBCategoryId(initialBCategoryId);
+          fetchSubCategories(initialBCategoryId);
+        }
+      }
+    }, [categories, initialBCategoryId]);
+  
+    useEffect(() => {
+      if (initialMCategoryId) {
+        const selectedCategory = subCategories.find((c) => c.id === initialMCategoryId);
+        if (selectedCategory) {
+          setSelectedSubCategory(selectedCategory.name);
+          setMCategoryId(initialMCategoryId);
+          fetchMinorCategories(initialMCategoryId);
+        }
+      }
+    }, [subCategories, initialMCategoryId]);
+  
+    useEffect(() => {
+      if (initialSCategoryId) {
+        const selectedCategory = minorCategories.find((c) => c.id === initialSCategoryId);
+        if (selectedCategory) {
+          setSelectedMinorCategory(selectedCategory.name);
+          setSCategoryId(initialSCategoryId);
+        }
+      }
+    }, [minorCategories, initialSCategoryId]);
+
     const fetchSubCategories = async (mainCategoryId: number) => {
       try {
         const response = await useGetMCategories(mainCategoryId.toString());
