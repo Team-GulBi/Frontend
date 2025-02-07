@@ -1,7 +1,6 @@
 import { ReactComponent as Star } from '@/assets/svgs/star.svg';
-import product1 from '@/assets/images/product1.jpeg';
 import profile from '@/assets/images/profile.png';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ReviewCard } from '../../../components/Product/ReviewCard';
 import {
   Carousel,
@@ -14,19 +13,26 @@ import { HeaderWithoutSearch } from '@/components/common/Header';
 import { ReadyToRentChip } from '@/components/common/ProductStatusChip';
 import { NavigateButton } from '@/components/Product/Button/NavigateButton';
 import { ProductRelatedButton } from '@/components/Product/Button/ProductRelatedButton';
+import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
+import useGetProductDetail from '@/hooks/queries/useGetProductDetail';
+import useSeperateTags from '@/hooks/utils/useSeperateTags';
 
 const ProductViewPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { data, isLoading } = useGetProductDetail(Number(id));
 
-  const handleNavigateHome = () => {
-    navigate('/');
+  const tagList = useSeperateTags(data?.data?.tag);
+
+  const handleNavigatePage = () => {
+    navigate("/");
+  }
+
+  const handleEdit = () => {
+    navigate(`/product/edit/${id}`);
   };
 
-  const handleNavigateEdit = () => {
-    navigate('/product/1/edit');
-  };
-
-  const tags = ['#가전제품', '#노트북', '#애플', '#맥북', '#실버'];
+  if (isLoading) return <div>로딩 중...</div>;
 
   return (
     <div className="min-h-screen flex w-screen pb-[133px]">
@@ -34,7 +40,7 @@ const ProductViewPage = () => {
       <div className="flex w-full flex-col px-[220px] pt-[110px]">
         <div className="flex justify-end space-x-2">
           <ProductRelatedButton
-            onClick={handleNavigateEdit}
+            onClick={handleEdit}
             className="text-neutral-30"
           >
             수정하기
@@ -45,29 +51,36 @@ const ProductViewPage = () => {
         </div>
 
         <div className="mb-12 flex flex-col items-start border-b px-[23px] pb-[15px]">
-          <div className="mb-4 flex w-full space-x-3">
-            <ReadyToRentChip />
-            <div className="flex space-x-[6px]">
+          <div className="mb-2 flex w-full flex-col">
+            <div className="mb-2 flex items-end gap-1">
               <Star className="self-center" />
-              <span className="pt-1 text-large22 font-medium text-neutral-20">
-                4.5
+              <span className="pt-1 text-medium20 font-medium text-neutral-20">
+                {data?.data?.rating}
               </span>
+            </div>
+            <div className="flex items-center space-x-2 text-small16 text-neutral-40">
+              <ReadyToRentChip />
+              <span>{data?.data?.bcategory.name}</span>
+              <RightArray />
+              <span>{data?.data?.mcategory.name}</span>
+              <RightArray />
+              <span>{data?.data?.scategory.name}</span>
             </div>
           </div>
           <div className="flex w-full justify-between">
             <div className="flex flex-col">
               <span className="text-xlarge28 font-semibold text-neutral-0">
-                맥북 프로 실버 완전 싸게 대여하세요~
+                {data?.data?.title}
               </span>
               <div className="mt-2 flex gap-2">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="rounded-md bg-neutral-100 px-2 py-1 text-xsmall14 text-neutral-0"
-                  >
-                    {tag}
-                  </span>
-                ))}
+              {tagList.map((tag, index) => (
+                <span
+                  key={index}
+                  className="rounded-md bg-neutral-100 px-2 py-1 text-xsmall14 text-neutral-0"
+                >
+                  {tag}
+                </span>
+              ))}
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -87,12 +100,11 @@ const ProductViewPage = () => {
           <div className="flex w-full items-center">
             <Carousel>
               <CarouselContent>
+              {data?.data?.images.map((image, index) => (
                 <CarouselItem>
-                  <img src={product1} alt="product" className="w-full" />
+                  <img key={index} src={image} alt="product" className="w-full" />
                 </CarouselItem>
-                <CarouselItem>
-                  <img src={product1} alt="product" className="w-full" />
-                </CarouselItem>
+                    ))}
               </CarouselContent>
               <CarouselPrevious />
               <CarouselNext />
@@ -105,7 +117,7 @@ const ProductViewPage = () => {
                 상품명
               </span>
               <span className="text-small16 font-light text-neutral-0">
-                맥북 프로 실버 16RAM
+                {data?.data?.productName}
               </span>
             </div>
 
@@ -114,19 +126,8 @@ const ProductViewPage = () => {
                 가격
               </span>
               <span className="text-small16 font-light text-neutral-0">
-                10000원 / 일
+                {data?.data?.price}원
               </span>
-            </div>
-
-            <div className="flex flex-col space-y-2">
-              <span className="text-large22 font-medium text-neutral-0">
-                대여 가능 기간
-              </span>
-              <div className="flex space-x-4 text-small16 font-light text-neutral-0">
-                <span>2024. 09. 27</span>
-                <span>~</span>
-                <span>2024. 12. 05</span>
-              </div>
             </div>
 
             <div className="flex flex-col space-y-2">
@@ -134,23 +135,18 @@ const ProductViewPage = () => {
                 위치
               </span>
               <span className="text-small16 font-light text-neutral-0">
-                인천대학교 7호관 학회실
+                {data?.data?.sido} {data?.data?.sigungu} {data?.data?.bname}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <span className="text-large22 font-medium text-neutral-0">
+                상품 소개
+              </span>
+              <span className="text-small16 font-light text-neutral-0">
+                {data?.data?.description}
               </span>
             </div>
           </div>
-        </div>
-
-        <div className="mx-[38px] mb-[50px] flex flex-col space-y-2">
-          <span className="text-large22 font-medium text-neutral-0">
-            상품 소개
-          </span>
-          <span className="text-small16 font-light text-neutral-0">
-            맥북 프로 실버 모델은 애플의 강력한 성능과 세련된 디자인을 갖춘
-            노트북으로, 고성능 작업이 필요한 전문가부터 일상적인 사용자를 위한
-            최적의 선택지입니다. 최신 M2 및 M2 Pro, M2 Max 칩 옵션으로 제공되며,
-            14인치와 16인치 두 가지 크기로 사용자의 용도에 맞게 선택할 수
-            있습니다.
-          </span>
         </div>
 
         <div className="mx-[30px] mb-[30px] flex flex-col space-y-4 rounded-[8px] border border-neutral-80 bg-[#F7F7F7] px-6 py-5">
@@ -172,22 +168,23 @@ const ProductViewPage = () => {
         </div>
 
         <div className="mx-[30px] mb-[25px] flex justify-end space-x-6">
-          <NavigateButton onClick={handleNavigateHome}>채팅하기</NavigateButton>
-          <NavigateButton onClick={handleNavigateHome}>예약하기</NavigateButton>
-          <NavigateButton onClick={handleNavigateHome}>
+          <NavigateButton onClick={handleNavigatePage}>채팅하기</NavigateButton>
+          <NavigateButton onClick={handleNavigatePage}>예약하기</NavigateButton>
+          <NavigateButton onClick={handleNavigatePage}>
             계약서 작성하기
           </NavigateButton>
         </div>
 
         <div className="mb-7 border-b py-[10px]">
           <span className="px-[23px] text-large24 font-semibold text-neutral-0">
-            맥북 실버 프로 후기
+            {data?.data?.productName} 후기
           </span>
         </div>
 
         <div className="flex flex-col space-y-9">
-          <ReviewCard />
-          <ReviewCard />
+          {data?.data?.reviews.map((review, index) => (
+            <ReviewCard key={index} nickname="닉네임" rating={review.rating} content={review.content} createdAt="2025.02.06"/>
+          ))}
         </div>
       </div>
     </div>

@@ -1,0 +1,60 @@
+import { client } from '@/apis';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+
+export type ProductDetailResponse = {
+  status: string;
+  code: string;
+  message: string;
+  data: ProductDetailResult | null;
+};
+
+type ProductDetailResult = {
+  tag: string;
+  title: string;
+  productName: string;
+  price: string;
+  view?: string;
+  rating?: string;
+  sido: string;
+  sigungu: string;
+  bname: string;
+  description: string;
+  bcategory: CategoryResult;
+  mcategory: CategoryResult;
+  scategory: CategoryResult;
+  created_at: string;
+  images: string[];
+  reviews: ReviewResult[];
+};
+
+type ReviewResult = {
+  rating: number;
+  averageRating: number;
+  id: number;
+  content: string;
+}
+
+type CategoryResult = {
+  id: number;
+  name: string;
+  parent: CategoryResult | null;
+};
+
+const getProductDetail = async (productId: number) => {
+  const response = await client.get<ProductDetailResponse>(
+    `/products/${productId}`,
+  );
+  return response.data;
+};
+
+const useGetProductDetail = (
+  productId: number,
+): UseQueryResult<ProductDetailResponse, AxiosError> => {
+  return useQuery<ProductDetailResponse, AxiosError>({
+    queryKey: ['productDetail', productId],
+    queryFn: () => getProductDetail(productId),
+  });
+};
+
+export default useGetProductDetail;
