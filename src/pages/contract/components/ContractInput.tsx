@@ -352,18 +352,7 @@ export const ContractInput = ({
           />
         </p>
         <p>
-          <strong>차용인:</strong>{" "}
-          <input
-            type="text"
-            name="borrower"
-            value={formValues.borrower}
-            onChange={handleInputChange}
-            className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-            placeholder="입력"
-            style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-            }}
-          />
+          <strong>차용인:</strong> <span className="underline underline-offset-2">{borrower}</span>
         </p>
       </div>
     </div>
