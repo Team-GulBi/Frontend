@@ -20,29 +20,36 @@ interface ContractProps {
   latePenaltyRate: number;
   damageCompensationRate: number;
   createdDate: string;
+  url: string;
+}
+
+interface ContractInputProps extends ContractProps {
+  onInputChange: (data: ContractProps) => void; // 부모로 값을 전달할 함수 추가
 }
 
 export const ContractInput = ({
-  lender,
-  borrower,
-  itemName,
-  specifications,
-  quantity,
-  condition,
-  notes,
-  rentalEndDate,
-  rentalPlace,
-  rentalDetailAddress,
-  returnDate,
-  returnPlace,
-  returnDetailAddress,
-  rentalFee,
-  paymentDate,
-  lateInterestRate,
-  latePenaltyRate,
-  damageCompensationRate,
-  createdDate,
-}: ContractProps ) => {
+  lender = "",
+  borrower = "",
+  itemName = "",
+  specifications = "",
+  quantity = 0,
+  condition = "",
+  notes = "",
+  rentalEndDate = "",
+  rentalPlace = "",
+  rentalDetailAddress = "",
+  returnDate = "",
+  returnPlace = "",
+  returnDetailAddress = "",
+  rentalFee = 0,
+  paymentDate = "",
+  lateInterestRate = 0,
+  latePenaltyRate = 0,
+  damageCompensationRate = 0,
+  createdDate = "",
+  url = "",
+  onInputChange, // 부모로 전달받은 함수
+}: ContractInputProps) => {
   const [formValues, setFormValues] = useState<ContractProps>({
     lender,
     borrower,
@@ -63,14 +70,16 @@ export const ContractInput = ({
     latePenaltyRate,
     damageCompensationRate,
     createdDate,
+    url,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
+    setFormValues((prevValues) => {
+      const updatedValues = { ...prevValues, [name]: value };
+      onInputChange(updatedValues); // 부모 컴포넌트에 값 전달
+      return updatedValues;
+    });
   };
 
   return (
@@ -255,7 +264,7 @@ export const ContractInput = ({
         />{" "}
         으로 정한다. 차용인은 {" "}
         <input
-          type="number"
+          type="text"
           name="paymentDate"
           value={formValues.paymentDate}
           onChange={handleInputChange}
