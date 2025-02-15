@@ -26,6 +26,8 @@ type ProductDetailResult = {
   created_at: string;
   images: string[];
   reviews: ReviewResult[];
+  userPhoto: imageUrl;
+  userNickname: string;
 };
 
 type ReviewResult = {
@@ -35,25 +37,31 @@ type ReviewResult = {
   content: string;
 }
 
+type imageUrl = {
+  imageUrl: string;
+}
+
 type CategoryResult = {
   id: number;
   name: string;
   parent: CategoryResult | null;
 };
 
-const getProductDetail = async (productId: number) => {
-  const response = await client.get<ProductDetailResponse>(
-    `/products/${productId}`,
-  );
-  return response.data;
+const getProductDetail = async (productId: number) => {  
+  try {
+    const response = await client.get<ProductDetailResponse>(`/products/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
-const useGetProductDetail = (
-  productId: number,
-): UseQueryResult<ProductDetailResponse, AxiosError> => {
-  return useQuery<ProductDetailResponse, AxiosError>({
-    queryKey: ['productDetail', productId],
-    queryFn: () => getProductDetail(productId),
+const useGetProductDetail = (productId?: number): UseQueryResult<ProductDetailResponse | null, AxiosError> => {
+  return useQuery<ProductDetailResponse | null, AxiosError>({
+    queryKey: ['product', productId],
+    queryFn: () => (productId ? getProductDetail(productId) : Promise.resolve(null)),
+    enabled: !!productId,
   });
 };
 
