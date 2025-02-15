@@ -18,9 +18,7 @@ type ProductRequest = {
   mainImage: File;
 };
 
-const postProduct = async (
-  request: ProductRequest,
-): Promise<ProductDetailResponse> => {
+const postProduct = async (request: ProductRequest): Promise<ProductDetailResponse> => {
   const formData = new FormData();
   const productData = {
     tag: request.tag,
@@ -43,21 +41,19 @@ const postProduct = async (
     }),
   );
 
+  if (request.mainImage) {
+    formData.append('mainImage', request.mainImage);
+  }
+
   request.images.forEach((file: File) => {
     formData.append('images', file);
   });
 
-  formData.append('mainImage', request.mainImage);
-
-  const response = await client.post<ProductDetailResponse>(
-    '/products',
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+  const response = await client.post<ProductDetailResponse>('/products', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
     },
-  );
+  });
 
   return response.data;
 };

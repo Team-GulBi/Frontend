@@ -8,6 +8,8 @@ import { CategoryDropdowns } from '@/components/Product/ProductCategory';
 import { ProductContent } from '@/components/Product/ProductContent';
 import { ProductInput } from '@/components/Product/Input/ProductInput';
 import usePostProduct from '@/hooks/mutations/usePostProduct';
+import { useNavigate } from 'react-router-dom';
+import RoutePath from '@/routes/routePath';
 
 const ProductCreatePage = () => {
   const [title, setTitle] = useState('');
@@ -24,11 +26,12 @@ const ProductCreatePage = () => {
   const [images, setImages] = useState<File[]>([]);
   const [mainImage, setMainImage] = useState<File | null>(null);
 
+  const navigate = useNavigate();
   const { mutate: createProduct, isPending: isUpdating } = usePostProduct();
 
-  const handleImageUpload = (newImages: string[]) => {
-    const files = newImages.map((imageUrl) => new File([], imageUrl));
-    setImages(files);
+  const handleImageUpload = (imageFiles: File[], mainImageFile: File | null) => {
+    setImages(imageFiles);
+    setMainImage(mainImageFile);
   };
 
   const handleLocationChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +62,8 @@ const ProductCreatePage = () => {
       images,
       mainImage,
     });
+
+    navigate(RoutePath.MyPage);
   };
 
   if (isUpdating) {
@@ -76,7 +81,10 @@ const ProductCreatePage = () => {
           <ProductInput title="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
           <ProductInput title="상품명" value={name} onChange={(e) => setName(e.target.value)} />
           <TagInput onTagsChange={setTag} />
-          <ImageUploader maxImages={10} onImagesChange={handleImageUpload} onMainImageChange={setMainImage} />
+          <ImageUploader
+            maxImages={10}
+            onImagesChange={handleImageUpload}
+          />
           <PriceInput value={price} onChangePrice={(e) => setPrice(e.target.value)} />
           <CategoryDropdowns 
             setBCategoryId={setBCategoryId}
