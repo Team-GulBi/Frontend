@@ -1,6 +1,6 @@
 import { ReactComponent as Star } from '@/assets/svgs/star.svg';
-import profile from '@/assets/images/profile.png';
 import { useNavigate, useParams } from 'react-router-dom';
+import DefaultProfile from "@/assets/images/DefaultProfile.png";
 import { ReviewCard } from '../../../components/Product/ReviewCard';
 import {
   Carousel,
@@ -16,11 +16,13 @@ import { ProductRelatedButton } from '@/components/Product/Button/ProductRelated
 import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
 import useGetProductDetail from '@/hooks/queries/useGetProductDetail';
 import useSeperateTags from '@/hooks/utils/useSeperateTags';
+import { useDeleteProduct } from '@/hooks/mutations/useDeleteProduct';
 
 const ProductViewPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data, isLoading } = useGetProductDetail(Number(id));
+  const { mutate: deleteProduct, isPending } = useDeleteProduct();
 
   const tagList = useSeperateTags(data?.data?.tag);
 
@@ -32,7 +34,18 @@ const ProductViewPage = () => {
     navigate(`/product/edit/${id}`);
   };
 
-  if (isLoading) return <div>로딩 중...</div>;
+  // 삭제 모달 추가 예정
+  const handleDelete = () => {
+    if (window.confirm("상품을 삭제하시겠습니까?")) {
+      deleteProduct(Number(id), {
+        onSuccess: () => {
+          navigate("/");
+        },
+      });
+    }
+  };
+
+  if (isLoading || isPending) return <div>로딩 중...</div>;
 
   return (
     <div className="min-h-screen flex w-screen pb-[133px]">
@@ -45,7 +58,7 @@ const ProductViewPage = () => {
           >
             수정하기
           </ProductRelatedButton>
-          <ProductRelatedButton className="text-[#D82D30]">
+          <ProductRelatedButton onClick={handleDelete} className="text-[#D82D30]">
             삭제하기
           </ProductRelatedButton>
         </div>
@@ -85,31 +98,47 @@ const ProductViewPage = () => {
             </div>
             <div className="flex items-center space-x-2">
               <img
-                src={profile}
+                src={data?.data?.userPhoto.imageUrl || DefaultProfile}
                 alt="profile"
-                className="h-11 w-11 rounded-full bg-[#F4D9DC]"
+                className="h-11 w-11 rounded-full border"
               />
               <span className="text-medium20 font-medium text-neutral-0">
-                지니핑
+                {data?.data?.userNickname}
               </span>
             </div>
           </div>
         </div>
 
         <div className="mx-[38px] mb-[46px] flex space-x-[120px]">
-          <div className="flex w-full items-center">
-            <Carousel>
-              <CarouselContent>
-              {data?.data?.images.map((image, index) => (
-                <CarouselItem>
-                  <img key={index} src={image} alt="product" className="w-full" />
-                </CarouselItem>
-                    ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </div>
+        <div className="flex w-full items-center">
+    <Carousel>
+      <CarouselContent>
+        {data?.data?.images?.length ? (
+          <CarouselItem key="main">
+            <img
+              src={decodeURIComponent(data.data.images[0])}
+              alt="main-product"
+              className="w-full object-cover rounded-md"
+            />
+          </CarouselItem>
+        ) : (
+          <div>대표 이미지 없음</div>
+        )}
+
+        {(data?.data?.images?.slice(1) ?? []).map((image, index) => (
+          <CarouselItem key={`product-${index + 1}`}>
+            <img
+              src={decodeURIComponent(image)}
+              alt={`product-${index + 1}`}
+              className="w-full object-cover rounded-md"
+            />
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
+  </div>
 
           <div className="flex w-full flex-col space-y-8 pr-10">
             <div className="flex flex-col space-y-2">
