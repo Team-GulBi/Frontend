@@ -1,33 +1,20 @@
 import { client } from "@/apis";
+import { ReviewRequest, ReviewResponse } from "./usePostReview";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
-export interface ReviewRequest {
-    productId?: number;
-    reviewId?: number;
-    rating: number;
-    content: string;
-}
-
-export interface ReviewResponse {
-    status: string;
-    code: string;
-    message: string;
-    data: null;
-}
-
-const postReview = async (
+const patchReview = async(
     request: ReviewRequest
 ): Promise<ReviewResponse> => {
-    const response = await client.post<ReviewResponse>("/review", request);
+    const response = await client.patch<ReviewResponse>("/review", request);
     return response.data;
 };
 
-const usePostReview = () => {
+const usePatchReview = () => {
     const queryClient = useQueryClient();
 
     return useMutation<ReviewResponse, AxiosError, ReviewRequest>({
-        mutationFn: postReview,
+        mutationFn: patchReview,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["review"] });
         },
@@ -37,4 +24,4 @@ const usePostReview = () => {
     });
 }
 
-export default usePostReview;
+export default usePatchReview;
