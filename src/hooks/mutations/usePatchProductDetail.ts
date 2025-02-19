@@ -21,8 +21,14 @@ export type ProductDetailRequest = {
   };
   addingImages?: File[];
   toBeUpdatedMainImageFile?: File | null;
-  toBeUpdatedMainImageUrl?: string;
-  deletedImageId?: number[];
+  toBeUpdatedMainImageUrl?: {
+    mainImageUrl: {
+      imageUrl: string;
+    };
+  };
+  deletedImageId?: {
+    imagesId: number[];
+  };
 };
 
 const patchProductDetail = async (
@@ -30,50 +36,47 @@ const patchProductDetail = async (
 ): Promise<ProductDetailResponse> => {
   const formData = new FormData();
 
-  if (request.productInfo) {
-    formData.append(
-      'productInfo',
-      new Blob([JSON.stringify(request.productInfo)], { type: 'application/json' })
-    );
+  if (request.productInfo && Object.keys(request.productInfo).length > 0) {
+    formData.append("productInfo", JSON.stringify(request.productInfo));
   }
 
-  if (request.category) {
-    formData.append(
-      'category',
-      new Blob([JSON.stringify(request.category)], { type: 'application/json' })
-    );
+  if (request.category && Object.keys(request.category).length > 0) {
+    formData.append("category", JSON.stringify(request.category));
   }
 
-  request.addingImages?.forEach((file) => {
-    formData.append('addingImages', file);
-  });
+  if (request.addingImages && request.addingImages.length > 0) {
+    request.addingImages.filter(Boolean).forEach((file) => {
+      formData.append("addingImages", file);
+    });
+  }
 
   if (request.toBeUpdatedMainImageFile) {
-    formData.append('toBeUpdatedMainImageFile', request.toBeUpdatedMainImageFile);
+    formData.append("toBeUpdatedMainImageFile", request.toBeUpdatedMainImageFile);
   }
 
   if (request.toBeUpdatedMainImageUrl) {
     formData.append(
-      'toBeUpdatedMainImageUrl',
-      new Blob([JSON.stringify({ mainImageUrl: { imageUrl: request.toBeUpdatedMainImageUrl } })], { type: 'application/json' })
+      "toBeUpdatedMainImageUrl",
+      new Blob([JSON.stringify(request.toBeUpdatedMainImageUrl)], { type: "application/json" })
     );
   }
 
-  if (request.deletedImageId && request.deletedImageId.length > 0) {
+  if (request.deletedImageId && request.deletedImageId.imagesId.length > 0) {
     formData.append(
-      'deletedImageId',
-      new Blob([JSON.stringify({ imagesId: request.deletedImageId })], { type: 'application/json' })
+      "deletedImageId",
+      new Blob([JSON.stringify(request.deletedImageId)], { type: "application/json" })
     );
   }
 
   const response = await client.patch<ProductDetailResponse>(
-    `/api/v1/products/${request.productId}`,
+    `/products/${request.productId}`,
     formData,
     {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    },
+      withCredentials: true,
+    }
   );
 
   return response.data;
