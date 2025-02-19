@@ -7,7 +7,7 @@ const deleteProduct = async (productId: number) => {
   });
 };
 
-export const useDeleteProduct = () => {
+const useDeleteProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteProduct,
@@ -19,3 +19,5 @@ export const useDeleteProduct = () => {
     },
   });
 };
+
+export default useDeleteProduct;

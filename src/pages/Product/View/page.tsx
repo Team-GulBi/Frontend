@@ -16,7 +16,7 @@ import { ProductRelatedButton } from '@/components/Product/Button/ProductRelated
 import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
 import useGetProductDetail from '@/hooks/queries/useGetProductDetail';
 import useSeperateTags from '@/hooks/utils/useSeperateTags';
-import { useDeleteProduct } from '@/hooks/mutations/useDeleteProduct';
+import { useDeleteProduct } from '@/hooks/mutations';
 
 const ProductViewPage = () => {
   const navigate = useNavigate();
@@ -24,6 +24,7 @@ const ProductViewPage = () => {
   const { data, isLoading } = useGetProductDetail(Number(id));
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
 
+  
   const tagList = useSeperateTags(data?.data?.tag);
 
   const handleNavigatePage = () => {
