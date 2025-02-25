@@ -7,32 +7,41 @@ import { useQueryClient } from '@tanstack/react-query';
 export default function DefaultContractPage() {
   const [isChecked, setIsChecked] = useState(false);
   // const [contractId, setContractId] = useState<number | null>(null);
-  const [formvalues, setContractData] = useState<any>({});  // To store form values
+  const [formValues, setFormValues] = useState<any>({});  // To store form values
 
   const createContractMutation = useCreateContract();
   const lenderApprovalMutation = useLenderApproval();
   const queryClient = useQueryClient();
-  const handleAgreeClick = () => {
-    setIsChecked(!isChecked);
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsChecked(event.target.checked);
   };
 
   const handleCompleteClick = async () => {
-    if (!formvalues) {
+    if (!formValues) {
       alert("계약 정보를 모두 입력해주세요.");
       return;
     }
   
     try {
       // 1. 계약 생성 API 호출
+      // 날짜 변환
+    const formattedValues = {
+      ...formValues,
+      rentalEndDate: new Date(formValues.rentalEndDate).toISOString(),
+      returnDate: new Date(formValues.returnDate).toISOString(),
+      paymentDate: new Date(formValues.paymentDate).toISOString(),
+      createdDate: new Date(formValues.createdDate).toISOString(),
+    };
+
       await createContractMutation.mutateAsync({
-        contractData: formvalues,
-        applicationId: 4
+        contractData: formattedValues,
+        applicationId: 1
       });
       // 2. 계약 ID 가져오기
       
       const contractIdResponse = await queryClient.fetchQuery({
-        queryKey: ['getContractIdByApplication', 4],
-        queryFn: () => getContractIdByApplication(4) //applicationId 임시 상수로 설정
+        queryKey: ['getContractIdByApplication', 1],
+        queryFn: () => getContractIdByApplication(1) //applicationId 임시 상수로 설정
       });
       
       // 응답이 배열 형태이므로 첫 번째 요소의 id를 가져옵니다.
@@ -65,8 +74,8 @@ export default function DefaultContractPage() {
           }}
         >
           <ContractInput
-             {...formvalues}  // contractData 상태 전달
-             onInputChange={setContractData}  // setContractData 함수 전달
+             {...formValues}  // contractData 상태 전달
+             onInputChange={setFormValues}  // setContractData 함수 전달
           />
         </div>
       </div>
@@ -78,7 +87,7 @@ export default function DefaultContractPage() {
           <input
             type="checkbox"
             checked={isChecked}
-            onClick={handleAgreeClick}
+            onChange={handleCheckboxChange}
             className="w-5 h-5 ml-2 border-2 border-gray-400 rounded-lg text-[#357fff] hover:scale-[105%] cursor-pointer"
           />
         </label>

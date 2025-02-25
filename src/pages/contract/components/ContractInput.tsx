@@ -175,7 +175,7 @@ export const ContractInput = ({
       <p>
         1. 대여인은 차용인에게{" "}
         <input
-          type="text"
+          type="date"
           name="rentalEndDate"
           value={formValues.rentalEndDate}
           onChange={handleInputChange}
@@ -212,7 +212,7 @@ export const ContractInput = ({
         />{" "}</p><p className="mt-2">
         2. 본 계약에 따라 차용인은 임대기간 종료 후 {" "}
         <input
-          type="text"
+          type="date"
           name="returnDate"
           value={formValues.returnDate}
           onChange={handleInputChange}
@@ -264,7 +264,7 @@ export const ContractInput = ({
         />{" "}
         으로 정한다. 차용인은 {" "}
         <input
-          type="text"
+          type="date"
           name="paymentDate"
           value={formValues.paymentDate}
           onChange={handleInputChange}
@@ -334,7 +334,7 @@ export const ContractInput = ({
 
       <p className="mt-6 text-center font-medium">{" "}
         <input
-          type="text"
+          type="date"
           name="createdDate"
           value={formValues.createdDate}
           onChange={handleInputChange}

@@ -88,26 +88,28 @@ export const ContractCompleted = ({
     }));
   };
   return (
-    <div className="flex flex-col w-full h-full ">
+    <div className="flex flex-col w-full h-full px-8">
           <div className="flex w-full h-[85%] justify-center items-center overflow-hidden">
           </div>
       <span className="text-3xl font-bold text-center mb-8">차용 계약서(차용인ver)</span>
       <p className="font-extrabold ">
-        <strong className="">대여인:</strong> <span className="underline underline-offset-2">{lender}</span>
+        <strong className="">대여인:</strong> <span className="underline underline-offset-2">박명수</span>
       </p>
-      <p>
+      <span>
       <strong>차용인:</strong>{" "}
         <input
           type="text"
           name="borrower"
-          value={formValues.borrower}
+          value={formValues.borrower || ""}
           onChange={handleInputChange}
           className="bg-transparent focus:outline-black outline-dashed outline-[1px]"
           style={{
-            width: `${formValues.borrower.length + 3}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
+            width: `${formValues.borrower ? formValues.borrower.length + 3 : "미정"}ch`,
+            verticalAlign: 'middle', // 입력값의 수직 정렬 조정
+            // padding: "8px 4px",
           }}
         />
-      </p>
+      </span>
       <h2 className="text-2xl font-semibold mt-6 mb-4">물품 정보</h2>
       <table className="table-auto border-collapse border border-gray-400 w-full text-left mb-6">
     <thead>
@@ -149,7 +151,7 @@ export const ContractCompleted = ({
       <p>- 상세주소: <strong><span className="underline underline-offset-2">{returnDetailAddress}</span></strong></p>
       <h2 className="text-2xl font-semibold mt-6 mb-4">제 2조(임대료의 납부)</h2>
       <p>
-        차용물품에 대한 임대료는 <strong><span className="underline underline-offset-2">{rentalFee.toLocaleString()}원</span></strong>으로
+        차용물품에 대한 임대료는 <strong><span className="underline underline-offset-2"> {rentalFee ? rentalFee.toLocaleString() : "0"}원</span></strong>으로
         정한다. 차용인은 <strong><span className="underline underline-offset-2">{paymentDate}</span></strong>에 임대료를 일시지급해야 하며, 연체
         시 차용인은 본 계약에 따른 불이익을 받을 수 있다.
       </p>
@@ -183,11 +185,12 @@ export const ContractCompleted = ({
         <input
             type="text"
             name="borrower"
-            value={formValues.borrower}
+            value={formValues.borrower || ""}
             onChange={handleInputChange}
             className="bg-transparent focus:outline-black outline-dashed outline-[1px]"
             style={{
-              width: `${formValues.borrower.length + 3}ch`,
+              width: `${formValues.borrower ? formValues.borrower.length + 3 : "미정"}ch`,
+              verticalAlign: 'middle',
             }}
           />
           <span>(서명)</span>
@@ -220,23 +223,31 @@ export const ContractCapture = forwardRef<any, ContractCaptureProps>((props, ref
     try {
       // 전체 계약서 내용을 포함하도록 스타일 임시 적용
       const originalStyle = contractElement.style.cssText;
+      
       contractElement.style.height = 'auto';
+      contractElement.style.width = "100vw"; // 전체 화면 기준으로 고정
+      contractElement.style.transform = "scale(1)"; // 스케일 초기화
       contractElement.style.overflow = 'visible';
+      // 📌 html2canvas로 캡처
       const canvas = await html2canvas(contractElement, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        windowHeight: contractElement.scrollHeight,
+        width: contractElement.scrollWidth, // 캡처 width 고정
         height: contractElement.scrollHeight
       });
        // 원래 스타일로 복구
        contractElement.style.cssText = originalStyle;
-      const link = document.createElement('a');
-      link.download = 'contract.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // const link = document.createElement('a');
+      // link.download = 'contract.png';
+      // link.href = canvas.toDataURL('image/png');
+      // link.click(); -->>이미지 다운로드 로직
+      const dataUrl = canvas.toDataURL('image/png');
+      const blob = await (await fetch(dataUrl)).blob();
+      return blob;
     } catch (error) {
       console.error("캡처 오류:", error);
+      return null;
     }
   };
   // 부모에서 호출할 수 있도록 handleCapture를 노출

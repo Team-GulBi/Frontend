@@ -70,10 +70,24 @@ export const useBorrowerApproval = () => {
 export const useUploadContractFile = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ contractId, file }: { contractId: number; file: File }) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      const { data } = await client.post(`/application/1/contracts/${contractId}/file`, formData);
+    mutationFn: async ({ contractId, file }: { contractId: number; file: FormData }) => {
+    //   const formData = new FormData();
+    //   formData.append("file", file);
+    // axios 설정 로깅
+    console.log('업로드 시작:', { contractId });
+    const { data } = await client.post(`/application/1/contracts/${contractId}/file`, file,
+        {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              // axios가 자동으로 boundary를 설정하도록 하기 위해 
+              // 다른 헤더는 제거
+            },
+            // FormData 전송 시 변환 방지
+            transformRequest: [function (data) {
+              return data;
+            }],
+          }
+    );
       return data;
     },
     onSuccess: (_, { contractId }) => {
