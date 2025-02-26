@@ -24,11 +24,22 @@ type ProductDetailResult = {
   mcategory: CategoryResult;
   scategory: CategoryResult;
   created_at: string;
-  images: string[];
+  images: ProductImagesResult;
   reviews: ReviewResult[];
   userPhoto: imageUrl;
   userNickname: string;
 };
+
+type ProductImagesResult = {
+  productImages: [
+    {
+      id: number;
+      productid: number;
+      url: string;
+      main: boolean;
+    }
+  ]
+}
 
 type ReviewResult = {
   rating: number;

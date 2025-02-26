@@ -112,34 +112,42 @@ const ProductViewPage = () => {
 
         <div className="mx-[38px] mb-[46px] flex space-x-[120px]">
         <div className="flex w-full items-center">
-    <Carousel>
-      <CarouselContent>
-        {data?.data?.images?.length ? (
-          <CarouselItem key="main">
-            <img
-              src={decodeURIComponent(data.data.images[0])}
-              alt="main-product"
-              className="w-full object-cover rounded-md"
-            />
-          </CarouselItem>
-        ) : (
-          <div>대표 이미지 없음</div>
-        )}
+            <Carousel>
+              <CarouselContent>
+              {data?.data?.images?.productImages?.length ? (
+                <>
+                  {data?.data?.images?.productImages?.find(image => image.main) ? (
+                    <CarouselItem key="main">
+                      <img
+                        src={decodeURIComponent(data.data.images.productImages.find(image => image.main)!.url)}
+                        alt="main-product"
+                        className="w-full object-cover rounded-md"
+                      />
+                    </CarouselItem>
+                  ) : (
+                    <div>대표 이미지 없음</div>
+                  )}
 
-        {(data?.data?.images?.slice(1) ?? []).map((image, index) => (
-          <CarouselItem key={`product-${index + 1}`}>
-            <img
-              src={decodeURIComponent(image)}
-              alt={`product-${index + 1}`}
-              className="w-full object-cover rounded-md"
-            />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
-  </div>
+                  {data?.data?.images?.productImages
+                    ?.filter(image => !image.main)
+                    .map((image, index) => (
+                      <CarouselItem key={`product-${index + 1}`}>
+                        <img
+                          src={decodeURIComponent(image.url)}
+                          alt={`product-${index + 1}`}
+                          className="w-full object-cover rounded-md"
+                        />
+                      </CarouselItem>
+                    ))}
+                </>
+              ) : (
+                <div>이미지가 없습니다</div>
+              )}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </div>
 
           <div className="flex w-full flex-col space-y-8 pr-10">
             <div className="flex flex-col space-y-2">
