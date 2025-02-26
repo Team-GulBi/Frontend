@@ -1,4 +1,3 @@
-import { ImageUploader } from '@/components/Product/ImageUploader';
 import { ChangeEvent, useState } from 'react';
 import { TagInput } from '@/components/Product/Input/TagInput';
 import { PriceInput } from '@/components/Product/Input/PriceInput';
@@ -10,6 +9,7 @@ import { ProductInput } from '@/components/Product/Input/ProductInput';
 import usePostProduct from '@/hooks/mutations/usePostProduct';
 import { useNavigate } from 'react-router-dom';
 import RoutePath from '@/routes/routePath';
+import { CreateImageUploader } from '@/components/Product/ImageUploader/Create';
 
 const ProductCreatePage = () => {
   const [title, setTitle] = useState('');
@@ -81,7 +81,7 @@ const ProductCreatePage = () => {
           <ProductInput title="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
           <ProductInput title="상품명" value={name} onChange={(e) => setName(e.target.value)} />
           <TagInput onTagsChange={setTag} />
-          <ImageUploader
+          <CreateImageUploader
             maxImages={10}
             onImagesChange={handleImageUpload}
           />
