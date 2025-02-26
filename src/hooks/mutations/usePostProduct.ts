@@ -45,9 +45,11 @@ const postProduct = async (request: ProductRequest): Promise<ProductDetailRespon
     formData.append('mainImage', request.mainImage);
   }
 
-  request.images.forEach((file: File) => {
-    formData.append('images', file);
-  });
+  request.images
+    .filter((file) => file !== request.mainImage)
+    .forEach((file) => {
+      formData.append('images', file);
+    });
 
   const response = await client.post<ProductDetailResponse>('/products', formData, {
     headers: {
