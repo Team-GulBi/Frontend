@@ -17,13 +17,15 @@ import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
 import useGetProductDetail from '@/hooks/queries/useGetProductDetail';
 import useSeperateTags from '@/hooks/utils/useSeperateTags';
 import { useDeleteProduct } from '@/hooks/mutations';
+import { useState } from 'react';
+import { DeleteModal } from '@/components/common/DeleteModal';
 
 const ProductViewPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data, isLoading } = useGetProductDetail(Number(id));
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
-
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   const tagList = useSeperateTags(data?.data?.tag);
 
@@ -35,16 +37,19 @@ const ProductViewPage = () => {
     navigate(`/product/edit/${id}`);
   };
 
-  // 삭제 모달 추가 예정
   const handleDelete = () => {
-    if (window.confirm("상품을 삭제하시겠습니까?")) {
-      deleteProduct(Number(id), {
-        onSuccess: () => {
-          navigate("/");
-        },
-      });
-    }
+    setIsDeleteModalOpen(true);
   };
+
+  const confirmDelete = () => {
+    deleteProduct(Number(id), {
+      onSuccess: () => {
+        setIsDeleteModalOpen(false);
+        navigate("/");
+      },
+    });
+  };
+
 
   if (isLoading || isPending) return <div>로딩 중...</div>;
 
@@ -63,6 +68,13 @@ const ProductViewPage = () => {
             삭제하기
           </ProductRelatedButton>
         </div>
+
+        {isDeleteModalOpen && (
+          <DeleteModal
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={confirmDelete}
+          />
+        )}
 
         <div className="mb-12 flex flex-col items-start border-b px-[23px] pb-[15px]">
           <div className="mb-2 flex w-full flex-col">
