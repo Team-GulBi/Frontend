@@ -15,16 +15,14 @@ export type ProductDetailRequest = {
     description?: string;
   };
   category?: {
-    bcategoryId?: number;
-    mcategoryId?: number;
-    scategoryId?: number;
+    bCategoryId?: string;
+    mCategoryId?: string;
+    sCategoryId?: string;
   };
-  addingImages?: File[];
+  addingImages?: File[] | null;
   toBeUpdatedMainImageFile?: File | null;
-  toBeUpdatedMainImageUrl?: {
-    mainImageUrl: {
-      imageUrl: string;
-    };
+  toBeUpdatedMainimageUrl?: {
+    mainImageUrl: string;
   };
   deletedImageId?: {
     imagesId: number[];
@@ -45,7 +43,7 @@ const patchProductDetail = async (
   }
 
   if (request.addingImages && request.addingImages.length > 0) {
-    request.addingImages.filter(Boolean).forEach((file) => {
+    request.addingImages.forEach((file) => {
       formData.append("addingImages", file);
     });
   }
@@ -54,18 +52,12 @@ const patchProductDetail = async (
     formData.append("toBeUpdatedMainImageFile", request.toBeUpdatedMainImageFile);
   }
 
-  if (request.toBeUpdatedMainImageUrl) {
-    formData.append(
-      "toBeUpdatedMainImageUrl",
-      new Blob([JSON.stringify(request.toBeUpdatedMainImageUrl)], { type: "application/json" })
-    );
+  if (request.toBeUpdatedMainimageUrl) {
+    formData.append("toBeUpdatedMainimageUrl", JSON.stringify(request.toBeUpdatedMainimageUrl));
   }
 
-  if (request.deletedImageId && request.deletedImageId.imagesId.length > 0) {
-    formData.append(
-      "deletedImageId",
-      new Blob([JSON.stringify(request.deletedImageId)], { type: "application/json" })
-    );
+   if (request.deletedImageId && request.deletedImageId.imagesId.length > 0) {
+    formData.append("deletedImageId", JSON.stringify(request.deletedImageId));
   }
 
   const response = await client.patch<ProductDetailResponse>(
@@ -88,7 +80,7 @@ const usePatchProductDetail = () => {
     mutationFn: patchProductDetail,
     onSuccess: (data) => {
       console.log(data);
-      queryClient.invalidateQueries({ queryKey: ['productDetail'] });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
     },
     onError: (error) => {
       console.error(error);
