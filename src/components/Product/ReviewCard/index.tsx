@@ -13,12 +13,9 @@ export const ReviewCard = () => {
             <span className="mr-3 text-small16 font-semibold text-neutral-0">
               시험끝났다핑
             </span>
-            <Star
-              width="16"
-              height="17"
-              viewBox="0 0 22 23"
-              className="self-center"
-            />
+            <Star 
+                width="18" height="18" viewBox="0 0 13 13"
+                className="self-center text-[#FCAF15]" />
             <span className="font-regular ml-1 pt-[1px] text-small16 text-neutral-0">
               1.0
             </span>

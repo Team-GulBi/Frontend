@@ -48,7 +48,9 @@ const ProductViewPage = () => {
           <div className="mb-4 flex w-full space-x-3">
             <ReadyToRentChip />
             <div className="flex space-x-[6px]">
-              <Star className="self-center" />
+              <Star 
+                width="18" height="18" viewBox="0 0 13 13"
+                className="self-center text-[#FCAF15]" />
               <span className="pt-1 text-large22 font-medium text-neutral-20">
                 4.5
               </span>
@@ -184,7 +186,6 @@ const ProductViewPage = () => {
             맥북 실버 프로 후기
           </span>
         </div>
-
         <div className="flex flex-col space-y-9">
           <ReviewCard />
           <ReviewCard />
