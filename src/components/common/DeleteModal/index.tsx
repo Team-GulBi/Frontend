@@ -1,14 +1,16 @@
 interface DeleteModalProps {
+  title1: string;
+  title2: string;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-export const DeleteModal = ({ onClose, onConfirm }: DeleteModalProps) => {
+export const DeleteModal = ({ title1, title2, onClose, onConfirm }: DeleteModalProps) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg text-center w-[330px]">
-        <p className="text-medium18 font-semibold mt-4 mb-1">정말로 상품을 삭제하시겠습니까?</p>
-        <p className="text-xsmall14 text-neutral-40 mb-4">삭제된 상품은 복구할 수 없습니다.
+        <p className="text-medium18 font-semibold mt-4 mb-1">정말로 {title1} 삭제하시겠습니까?</p>
+        <p className="text-xsmall14 text-neutral-40 mb-4">삭제된 {title2} 복구할 수 없습니다.
             </p>
         <div className="flex justify-center gap-2">
           <button

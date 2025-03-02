@@ -71,6 +71,8 @@ const ProductViewPage = () => {
 
         {isDeleteModalOpen && (
           <DeleteModal
+            title1="상품을"
+            title2="상품은"
             onClose={() => setIsDeleteModalOpen(false)}
             onConfirm={confirmDelete}
           />
@@ -79,7 +81,9 @@ const ProductViewPage = () => {
         <div className="mb-12 flex flex-col items-start border-b px-[23px] pb-[15px]">
           <div className="mb-2 flex w-full flex-col">
             <div className="mb-2 flex items-end gap-1">
-              <Star className="self-center" />
+            <Star 
+                width="18" height="18" viewBox="0 0 13 13"
+                className="self-center text-[#FCAF15]" />
               <span className="pt-1 text-medium20 font-medium text-neutral-20">
                 {data?.data?.rating}
               </span>
@@ -230,10 +234,16 @@ const ProductViewPage = () => {
             {data?.data?.productName} 후기
           </span>
         </div>
-
         <div className="flex flex-col space-y-9">
-          {data?.data?.reviews.map((review, index) => (
-            <ReviewCard key={index} nickname="닉네임" rating={review.rating} content={review.content} createdAt="2025.02.06"/>
+          {data?.data?.reviews.map((review) => (
+            <ReviewCard
+              key={review.id}
+              reviewId={review.id}
+              nickname="wowow"
+              rating={review.rating}
+              content={review.content}
+              createdAt="1999.09.12"
+            />
           ))}
         </div>
       </div>
