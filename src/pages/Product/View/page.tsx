@@ -71,6 +71,8 @@ const ProductViewPage = () => {
 
         {isDeleteModalOpen && (
           <DeleteModal
+            title1="상품을"
+            title2="상품은"
             onClose={() => setIsDeleteModalOpen(false)}
             onConfirm={confirmDelete}
           />
@@ -233,8 +235,15 @@ const ProductViewPage = () => {
           </span>
         </div>
         <div className="flex flex-col space-y-9">
-          {data?.data?.reviews.map((review, index) => (
-            <ReviewCard key={index} nickname="닉네임" rating={review.rating} content={review.content} createdAt="2025.02.06"/>
+          {data?.data?.reviews.map((review) => (
+            <ReviewCard
+              key={review.id}
+              reviewId={review.id}
+              nickname="wowow"
+              rating={review.rating}
+              content={review.content}
+              createdAt="1999.09.12"
+            />
           ))}
         </div>
       </div>
