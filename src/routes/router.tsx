@@ -2,7 +2,6 @@ import { createBrowserRouter, RouteObject } from "react-router-dom";
 import RoutePath from "./routePath";
 import MainPage from "@/pages/Main/page";
 import ProductCreatePage from "@/pages/Product/Create/page";
-import ProductEditPage from "@/pages/Product/Edit/page";
 import ProductViewPage from "@/pages/Product/View/page";
 import ChatPage from "@/pages/Chat/page";
 import LoginPage from "@/pages/Auth/Login/page";
@@ -12,6 +11,7 @@ import MyPage from "@/pages/Mypage/page";
 import SearchPage from "@/pages/Search/page";
 import DefaultContractPage from "@/pages/contract/DefaultPage";
 import CompletedContractPage from "@/pages/contract/CompletedPage";
+import ProductEditPage from "@/pages/Product/Edit/page";
 
 const routes: RouteObject[] = [
   {
@@ -22,7 +22,7 @@ const routes: RouteObject[] = [
     path: RoutePath.ProductCreate,
     children: [
       { index: true, element: <ProductCreatePage /> },
-      { path: RoutePath.ProductEdit, element: <ProductEditPage /> },
+      { path: RoutePath.ProductEdit, element: <ProductEditPage />},
       { path: RoutePath.ProductView, element: <ProductViewPage /> },
     ],
   },
