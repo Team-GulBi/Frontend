@@ -2,7 +2,7 @@ const RoutePath = {
     Main: "/",
 
     ProductCreate: "/product",
-    ProductEdit: "/product/:id/edit",
+    ProductEdit: "/product/edit/:id",
     ProductView: "/product/:id",
 
     Chat: "/chat",

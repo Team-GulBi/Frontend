@@ -1,13 +1,20 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 interface TagInputProps {
     onTagsChange: (tags: string) => void;
+    initialTags?: string;
   }
   
-  export const TagInput = ({ onTagsChange }: TagInputProps) => {
+  export const TagInput = ({ onTagsChange, initialTags }: TagInputProps) => {
     const [inputValue, setInputValue] = useState('');
     const [tags, setTags] = useState<string[]>([]);
   
+    useEffect(() => {
+      if (initialTags) {
+        setTags(initialTags.split(",").map(tag => tag.trim()));
+      }
+    }, [initialTags]);
+
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
       setInputValue(e.target.value);
     };

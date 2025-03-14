@@ -16,7 +16,7 @@ const usePatchReview = () => {
     return useMutation<ReviewResponse, AxiosError, ReviewRequest>({
         mutationFn: patchReview,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["review"] });
+            queryClient.invalidateQueries({ queryKey: ["product"] });
         },
         onError: (error) => {
             console.error(error);

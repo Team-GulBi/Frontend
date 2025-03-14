@@ -1,120 +1,105 @@
-import { ImageUploader } from '../../../components/Product/ImageUploader';
-import { useState } from 'react';
-import { TagInput } from '../../../components/Product/Input/TagInput';
-import { PriceInput } from '../../../components/Product/Input/PriceInput';
-import { LocationInput } from '../../../components/Product/Input/LocationInput';
-import { DayInput } from '../../../components/Product/Input/DayInput';
+import { ChangeEvent, useState } from 'react';
+import { TagInput } from '@/components/Product/Input/TagInput';
+import { PriceInput } from '@/components/Product/Input/PriceInput';
+import { LocationInput } from '@/components/Product/Input/LocationInput';
 import { HeaderWithoutSearch } from '@/components/common/Header';
 import { CategoryDropdowns } from '@/components/Product/ProductCategory';
 import { ProductContent } from '@/components/Product/ProductContent';
 import { ProductInput } from '@/components/Product/Input/ProductInput';
+import usePostProduct from '@/hooks/mutations/usePostProduct';
+import { useNavigate } from 'react-router-dom';
+import RoutePath from '@/routes/routePath';
+import { CreateImageUploader } from '@/components/Product/ImageUploader/Create';
 
 const ProductCreatePage = () => {
-  const [title, setTitle] = useState<string>('');
-  const [productName, setProductName] = useState<string>('');
-  const [tags, setTags] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+  const [title, setTitle] = useState('');
+  const [name, setName] = useState('');
+  const [tag, setTag] = useState('');
+  const [description, setDescription] = useState('');
   const [price, setPrice] = useState<string>('');
-  const [sido, setSido] = useState<string>('');
-  const [sigungu, setSigungu] = useState<string>('');
-  const [bname, setBname] = useState<string>('');
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [images, setImages] = useState<string[]>([]);
+  const [sido, setSido] = useState('');
+  const [sigungu, setSigungu] = useState('');
+  const [bname, setBname] = useState('');
+  const [bcategoryId, setBCategoryId] = useState<number>(1);
+  const [mcategoryId, setMCategoryId] = useState<number>(2);
+  const [scategoryId, setSCategoryId] = useState<number>(3);
+  const [images, setImages] = useState<File[]>([]);
+  const [mainImage, setMainImage] = useState<File | null>(null);
 
-  const handleTagsChange = (newTags: string) => {
-    setTags(newTags);
+  const navigate = useNavigate();
+  const { mutate: createProduct, isPending: isUpdating } = usePostProduct();
+
+  const handleImageUpload = (imageFiles: File[], mainImageFile: File | null) => {
+    setImages(imageFiles);
+    setMainImage(mainImageFile);
   };
 
-  const handleImagesUpload = (newImages: string[]) => {
-    setImages(newImages);
+  const handleLocationChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === 'sido') setSido(value);
+    if (name === 'sigungu') setSigungu(value);
+    if (name === 'bname') setBname(value);
   };
 
-  const handleSubmit = async () => {
-    const formData = {
+  const handleSubmit = () => {
+    if (!mainImage) {
+      console.log("대표 이미지")
+      return;
+    }
+    
+    createProduct({
+      tag,
       title,
-      productName,
-      tags,
-      description,
+      name,
       price,
       sido,
       sigungu,
       bname,
-      startDate: startDate ? startDate.toISOString().split('T')[0] : '',
-      endDate: endDate ? endDate.toISOString().split('T')[0] : '',
+      description,
+      bcategoryId,
+      mcategoryId,
+      scategoryId,
       images,
-    };
-    
-    console.log(formData);
-    
-    // API
+      mainImage,
+    });
+
+    navigate(RoutePath.MyPage);
   };
+
+  if (isUpdating) {
+    return "로딩중";
+  }
 
   return (
     <div className="min-h-screen flex w-screen">
-      {/* 토큰 받았냐 안 받았냐에 따라 헤더 다르게 나옴 */}
       <HeaderWithoutSearch />
       <div className="flex w-full flex-col px-[240px] py-[60px]">
-        <div className="flex w-full border-b border-neutral-80 px-[1rem] pb-[2rem] pt-[4rem] text-xxlarge32 font-semibold text-neutral-0">
+        <div className="flex w-full border-b px-[1rem] pb-[2rem] pt-[4rem] text-xxlarge32 font-semibold">
           상품 등록하기
         </div>
         <div className="flex w-full flex-col gap-[2rem] px-[0.5rem] py-[2rem]">
-          <ProductInput
-            title="제목"
-            value={title}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setTitle(e.target.value)
-            }
+          <ProductInput title="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <ProductInput title="상품명" value={name} onChange={(e) => setName(e.target.value)} />
+          <TagInput onTagsChange={setTag} />
+          <CreateImageUploader
+            maxImages={10}
+            onImagesChange={handleImageUpload}
           />
-          <ProductInput
-            title="상품명"
-            value={productName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setProductName(e.target.value)
-            }
+          <PriceInput value={price} onChangePrice={(e) => setPrice(e.target.value)} />
+          <CategoryDropdowns 
+            setBCategoryId={setBCategoryId}
+            setMCategoryId={setMCategoryId}
+            setSCategoryId={setSCategoryId}
           />
-          <TagInput onTagsChange={handleTagsChange} />
-          <ImageUploader maxImages={10} onImagesChange={handleImagesUpload} />
-          <PriceInput
-            value={price}
-            onChangePrice={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setPrice(e.target.value)
-            }
-          />
-          <CategoryDropdowns />
-          <ProductContent
-            value={description}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setDescription(e.target.value)
-            }
-          />
+          <ProductContent value={description} onChange={(e) => setDescription(e.target.value)} />
           <LocationInput
-            title="위치"
-            sido={sido}
-            sigungu={sigungu}
-            bname={bname}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const { name, value } = e.target;
-
-              if (name === 'sido') {
-                setSido(value);
-              } else if (name === 'sigungu') {
-                setSigungu(value);
-              } else if (name === 'bname') {
-                setBname(value);
-              }
-            }}
-          />
-          <DayInput
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={(date: Date | null) => setStartDate(date)}
-            onEndDateChange={(date: Date | null) => setEndDate(date)}
-          />
-          <button
-            onClick={handleSubmit}
-            className="mx-[1rem] mb-[5rem] mt-6 rounded-xs bg-secondary-100 px-4 py-3 text-medium18 text-white"
-          >
+              title="위치"
+              sido={sido}
+              sigungu={sigungu}
+              bname={bname}
+              onChange={handleLocationChange}
+            />
+          <button onClick={handleSubmit} className="mx-[1rem] mb-[5rem] mt-6 bg-secondary-100 px-4 py-3 rounded-[6px] text-white">
             상품 등록
           </button>
         </div>
