@@ -7,7 +7,6 @@ import product1 from '@/assets/images/product1.jpeg';
 import product2 from '@/assets/images/product2.jpeg';
 import product3 from '@/assets/images/product3.jpeg';
 import product4 from '@/assets/images/product4.jpeg';
-import product5 from '@/assets/images/product5.jpeg';
 import { ProfileStatusChip } from '@/components/common/ProfileStatusChip';
 import { useState } from 'react';
 import { ProfileModifyModal } from '@/components/Modal/ProfileModifyModal';
@@ -18,27 +17,22 @@ const products = [
   {
     name: '맥북 프로 실버',
     imageSrc: product1,
-    status: '대여중',
+    price: 10000,
   },
   {
     name: '자전거',
     imageSrc: product2,
-    status: '대여 마감',
+    price: 10000,
   },
   {
     name: '아이폰 14 Pro',
     imageSrc: product3,
-    status: '예약중',
+    price: 10000,
   },
   {
     name: '에어팟 맥스',
     imageSrc: product4,
-    status: '대여 가능',
-  },
-  {
-    name: '에어팟',
-    imageSrc: product5,
-    status: '대여 가능',
+    price: 10000,
   },
 ];
 
@@ -101,7 +95,8 @@ const MyPage = () => {
                   key={index}
                   name={product.name}
                   imageSrc={product.imageSrc}
-                  status={product.status}
+                  price={product.price}
+                  productId={1}
                 />
               ))}
             </div>
@@ -123,7 +118,8 @@ const MyPage = () => {
                   key={index}
                   name={product.name}
                   imageSrc={product.imageSrc}
-                  status={product.status}
+                  price={product.price}
+                  productId={1}
                 />
               ))}
             </div>

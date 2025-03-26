@@ -12,22 +12,22 @@ const products = [
   {
     name: '맥북 프로 실버',
     imageSrc: product1,
-    status: '대여중',
+    price: 10000,
   },
   {
     name: '자전거',
     imageSrc: product2,
-    status: '대여 마감',
+    price: 10000,
   },
   {
     name: '아이폰 14 Pro',
     imageSrc: product3,
-    status: '예약중',
+    price: 10000,
   },
   {
     name: '에어팟 맥스',
     imageSrc: product4,
-    status: '대여 가능',
+    price: 10000,
   },
 ];
 
@@ -61,7 +61,7 @@ const MainPage = () => {
 
         <div className="flex-col mt-7 px-6">
           <div className='flex items-center justify-between'>
-            <div className="flex flex-col gap-[2px] mb-[3px] p-3">
+            <div className="flex flex-col gap-[2px] mb-[3px] pb-3">
               <span className="font-semibold text-neutral-30">
                 지금 사람들이 제일 많이 찾는 건 바로 이거!
               </span>
@@ -104,7 +104,7 @@ const MainPage = () => {
 
           <div className="max-w-[1000px] mb-[40px] flex-col">
             <div className='flex items-center justify-between'>
-              <div className="flex flex-col gap-[2px] mb-[3px] p-3">
+              <div className="flex flex-col gap-[2px] mb-[3px] pb-3">
                 <span className="font-semibold text-neutral-30">
                   지금 막 등록된 대여 상품, 빠르게 만나보세요!
                 </span>
@@ -124,7 +124,8 @@ const MainPage = () => {
                     key={index}
                     name={product.name}
                     imageSrc={product.imageSrc}
-                    status={product.status}
+                    price={product.price}
+                    productId={1}
                   />
                 ))}
               </div>
@@ -133,7 +134,7 @@ const MainPage = () => {
 
           <div className="mb-[40px] flex-col">
             <div className='flex items-center justify-between'>
-              <div className="flex flex-col gap-[2px] mb-[3px] p-3">
+              <div className="flex flex-col gap-[2px] mb-[3px] pb-3">
                 <span className="font-semibold text-neutral-30">
                   지금 가장 인기 있는 상품, 카테고리별로 한눈에
                 </span>
@@ -153,7 +154,8 @@ const MainPage = () => {
                     key={index}
                     name={product.name}
                     imageSrc={product.imageSrc}
-                    status={product.status}
+                    price={product.price}
+                    productId={1}
                   />
                 ))}
               </div>
