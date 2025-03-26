@@ -11,22 +11,22 @@ const products = [
   {
     name: '맥북 프로 실버',
     imageSrc: product1,
-    status: '대여중',
+    price:10000
   },
   {
     name: '자전거',
     imageSrc: product2,
-    status: '대여 마감',
+    price:10000
   },
   {
     name: '아이폰 14 Pro',
     imageSrc: product3,
-    status: '예약중',
+    price:10000
   },
   {
     name: '에어팟 맥스',
     imageSrc: product4,
-    status: '대여 가능',
+    price:10000
   },
 ];
 
@@ -71,7 +71,7 @@ const MainPage = () => {
                   key={index}
                   name={product.name}
                   imageSrc={product.imageSrc}
-                  status={product.status}
+                  price={product.price}
                 />
               ))}
             </div>
@@ -93,7 +93,7 @@ const MainPage = () => {
                   key={index}
                   name={product.name}
                   imageSrc={product.imageSrc}
-                  status={product.status}
+                  price={product.price}
                 />
               ))}
             </div>
