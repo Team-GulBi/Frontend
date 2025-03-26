@@ -57,7 +57,7 @@ export default {
   				'70': '#FED057',
   				'80': '#FFCB42',
   				'90': '#FFC116',
-  				'100': '#FFBB00',
+  				'100': '#FCAF15',
   				DEFAULT: 'hsl(var(--primary))',
   				dark: '#FAC608',
   				light: '#FFEB03',
