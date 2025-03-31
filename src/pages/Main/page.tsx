@@ -29,6 +29,11 @@ const products = [
     imageSrc: product4,
     price: 10000,
   },
+  {
+    name: '에어팟 맥스',
+    imageSrc: product4,
+    price: 10000,
+  },
 ];
 
 const MainPage = () => {
@@ -102,7 +107,7 @@ const MainPage = () => {
             ))}
           </div>
 
-          <div className="max-w-[1000px] mb-[40px] flex-col">
+          <div className="mb-[40px] flex-col">
             <div className='flex items-center justify-between'>
               <div className="flex flex-col gap-[2px] mb-[3px] pb-3">
                 <span className="font-semibold text-neutral-30">
@@ -118,7 +123,7 @@ const MainPage = () => {
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="grid grid-cols-1 gap-8 border-t-2 border-neutral-80 pt-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-8 border-t-2 border-neutral-80 pt-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {products.map((product, index) => (
                   <ProductCard
                     key={index}
@@ -148,7 +153,7 @@ const MainPage = () => {
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="grid grid-cols-1 gap-8 border-t-2 border-neutral-80 pt-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-8 border-t-2 border-neutral-80 pt-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {products.map((product, index) => (
                   <ProductCard
                     key={index}
