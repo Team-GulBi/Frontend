@@ -1,65 +1,54 @@
-interface ChatProps {
-  name: string;
-  product: string;
-  imgSrc: string;
-  time: string;
-  recentMessage: string;
-  chats: number;
-  onClick: () => void;
-}
+import { useEffect } from "react";
+import { useChatStore } from "@/libraries/stores/useChatStore";
+import { useUserStore } from "@/libraries/stores";
+import { ChatRoomListItem } from "./chatRoomListItem";
 
-export const ChatRoomListItem = ({
-  name,
-  product,
-  imgSrc,
-  time,
-  recentMessage,
-  chats,
-  onClick,
-}: ChatProps) => {
+
+const ChatRoomList = ({ onSelectRoom }: { onSelectRoom: (roomId: number) => void }) => {
+  const { chatRooms, fetchChatRooms } = useChatStore();
+  const myUserId = useUserStore((state) => state.userId);
+  
+  useEffect(() => {
+    fetchChatRooms();
+  }, []);
+
+  // ✅ chatRooms 상태 확인
+  useEffect(() => {
+    console.log("🟡 ChatRoomList - Zustand에서 가져온 chatRooms:", chatRooms);
+  }, [chatRooms]);
+
   return (
-    <div
-      className="flex w-full cursor-pointer bg-white px-5 py-[10px] hover:bg-neutral-90"
-      onClick={onClick}
-    >
-      <div className="flex w-full justify-between">
-        <div className="flex items-center justify-center">
-          <div className="mr-[11px] h-[50px] w-[50px] overflow-hidden rounded-full border">
-            <img
-              src={imgSrc}
-              alt={name}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="flex flex-col gap-[2px]">
-            <div className="flex gap-1">
-              <span className="self-center text-xsmall14 font-medium text-neutral-0">
-                {name}
-              </span>
-              <span className="font-regular self-end text-xxsmall10 text-neutral-40">
-                {product}
-              </span>
-            </div>
-            <span className="font-regular text-xxsmall10 text-neutral-0">
-              {recentMessage}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-col items-end justify-center gap-1">
-          <span className="font-regular self-end text-xxsmall10 text-neutral-50">
-            {time}
+    <div className="w-full">
+      {chatRooms.length === 0 ? (
+        <div className="flex h-full items-center justify-center">
+          <span className="pb-12 text-small16 font-regular text-neutral-30">
+            채팅 내역이 없습니다
           </span>
-          <div
-            className={`flex h-[16px] w-[16px] items-center justify-center rounded-full pt-[2px] ${chats === 0 ? 'bg-none' : 'bg-primary-100'}`}
-          >
-            {chats > 0 && (
-              <span className="text-xxsmall10 font-light text-white">
-                {chats}
-              </span>
-            )}
-          </div>
         </div>
-      </div>
+      ) : (
+        chatRooms.map((room, index) => {
+          if (!myUserId) return null;
+          const isUser1 = room.user1Id === myUserId;
+          const otherUserNickname = isUser1 ? room.user2Nickname : room.user1Nickname;
+
+          console.log(`🟢 채팅방 ${index} - 이름: ${otherUserNickname}, ID: ${room.id}`);
+
+          return (
+            <ChatRoomListItem
+              key={room.id}
+              name={otherUserNickname}
+              product="상품명"
+              imgSrc="/default-profile.png"
+              time="시간"
+              recentMessage="최근 메시지"
+              chats={0}
+              onClick={() => onSelectRoom(room.id)}
+            />
+          );
+        })
+      )}
     </div>
   );
 };
+
+export default ChatRoomList;

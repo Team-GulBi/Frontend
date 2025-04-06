@@ -6,7 +6,7 @@ import product3 from '@/assets/images/product3.jpeg';
 import product4 from '@/assets/images/product4.jpeg';
 import { HeaderWithSearch, LoginHeader} from '@/components/common/Header';
 import { ProductCard } from '@/components/common/ProductCard';
-
+import { useUserStore } from '@/libraries/stores';
 const products = [
   {
     name: '맥북 프로 실버',
@@ -32,6 +32,11 @@ const products = [
 
 const MainPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // 로그인 상태
+  const myUserId = useUserStore((state) => state.userId);
+  useEffect(() => {
+    console.log("myUserId 상태 확인:", myUserId);
+  }, [myUserId]);
+  
    // 컴포넌트 마운트 시 token 확인
    useEffect(() => {
     const token = localStorage.getItem('token');

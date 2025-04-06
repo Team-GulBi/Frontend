@@ -11,14 +11,7 @@ import { useActiveLink } from '@/hooks/utils/useActiveLink';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-const handleRedirect = (url: string) => {
-  const isLoggedIn = Boolean(localStorage.getItem('token')); // 버튼 클릭시 token 유무로 로그인 상태 확인
-  if (isLoggedIn) {
-    window.location.href = url; // 로그인 상태면 해당 URL로 이동
-  } else {
-    window.location.href = '/login'; // 로그아웃 상태면 /login으로 이동
-  }
-};
+
 export const HeaderWithSearch = () => {
   const isProductPage = useActiveLink('/product');
   const isChatPage = useActiveLink('/chat');
@@ -26,6 +19,15 @@ export const HeaderWithSearch = () => {
   const [selectedFilter, setSelectedFilter] = useState('상품명');
 
   const navigate = useNavigate();
+
+  const handleRedirect = (url: string) => {
+    const isLoggedIn = Boolean(localStorage.getItem('token')); // 버튼 클릭시 token 유무로 로그인 상태 확인
+    if (isLoggedIn) {
+      navigate(url); // 로그인 상태면 해당 URL로 이동
+    } else {
+      navigate('/login'); // 로그아웃 상태면 /login으로 이동
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -170,11 +172,23 @@ export const HeaderWithoutSearch = () => {
   const isChatPage = useActiveLink('/chat');
   const isMypage = useActiveLink('/profile');
 
+  const navigate = useNavigate();
+
+  const handleRedirect = (url: string) => {
+    const isLoggedIn = Boolean(localStorage.getItem('token')); // 버튼 클릭시 token 유무로 로그인 상태 확인
+    if (isLoggedIn) {
+      navigate(url); // 로그인 상태면 해당 URL로 이동
+    } else {
+      navigate('/login'); // 로그아웃 상태면 /login으로 이동
+    }
+  };
+
   return (
     <div className="bg-static-100 fixed top-0 z-30 w-screen border-b border-neutral-80 bg-primary-0 px-10 shadow-[2px_0px_2px_1px_rgba(0,0,0,0.05)]">
       <div className="flex h-[4.85rem] items-center justify-between">
         <div className="flex items-center gap-4">
-          <a className="h-[2.2rem] w-full" href="/">
+          <a className="h-[2.2rem] w-full" 
+          onClick={() => handleRedirect('/')}>
             <img className="h-full" src={logo} alt="야줘바 로고" />
           </a>
         </div>
