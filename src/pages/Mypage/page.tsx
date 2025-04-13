@@ -90,7 +90,7 @@ const MyPage = () => {
           <div className="flex justify-center">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-5">
               {(activeTab === 'owned' ? ownedProducts : rentedProducts).map((product, index) => (
-                <ProductCard key={index} name={product.name} imageSrc={product.imageSrc} price={product.price} />
+                <ProductCard key={index} name={product.name} imageSrc={product.imageSrc} price={product.price} productId={1}/>
               ))}
             </div>
           </div>
