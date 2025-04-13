@@ -45,7 +45,7 @@ const MainPage = () => {
   }, []);
   
   return (
-    <div className="min-h-screen flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center mb-10">
       {isLoggedIn ? <HeaderWithSearch /> : <LoginHeader />}
       <div className="flex flex-col w-full items-center justify-center pt-[75px]">
         <div className='relative flex w-full items-center justify-center h-[300px] py-10 shadow-lg bg-primary-10'>
@@ -65,48 +65,6 @@ const MainPage = () => {
         </div>
 
         <div className="flex-col mt-7 px-6">
-          <div className='flex items-center justify-between'>
-            <div className="flex flex-col gap-[2px] mb-[3px] pb-3">
-              <span className="font-semibold text-neutral-30">
-                지금 사람들이 제일 많이 찾는 건 바로 이거!
-              </span>
-              <span className="text-medium20 font-bold text-neutral-0">
-                실시간 인기 카테고리 3종
-              </span>
-            </div>
-            <div className='p-1 flex items-center font-semibold gap-[6px] text-neutral-40 border-neutral-40 cursor-pointer hover:text-neutral-30'>
-              <RightArrow />
-              <span className='text-xsmall14'>인기 카테고리 상품들 보러가기</span>
-            </div>
-          </div>
-
-          <div className='flex items-end justify-center h-[240px] gap-6 mb-[40px] border-t-2 border-neutral-80'>
-            {[
-              { rank: '2등', category: '과일', size: 170, bg: 'bg-primary-70/70', delay: 'delay-100' },
-              { rank: '1등', category: '전자제품', size: 200, bg: 'bg-primary-100/70', delay: 'delay-0' },
-              { rank: '3등', category: '학용품', size: 140, bg: 'bg-primary-50/70', delay: 'delay-200' },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className={`
-                  flex flex-col items-center justify-center
-                  rounded-full shadow-xl hover:shadow-2xl ring-1 ring-white/20
-                  ${item.bg} gap-4
-                  transition-transform duration-300 ease-out hover:scale-105
-                `}
-                style={{ width: `${item.size}px`, height: `${item.size}px` }}
-              >
-                <span className='text-neutral-30'>{item.rank}</span>
-                <span className={`
-                  font-bold text-neutral-10
-                  ${item.rank === '1등' ? 'text-large24' : item.rank === '2등' ? 'text-large22' : 'text-medium20'}
-                `}>
-                  {item.category}
-                </span>
-              </div>
-            ))}
-          </div>
-
           <div className="mb-[40px] flex-col">
             <div className='flex items-center justify-between'>
               <div className="flex flex-col gap-[2px] mb-[3px] pb-3">
@@ -165,6 +123,48 @@ const MainPage = () => {
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className='flex items-center justify-between'>
+            <div className="flex flex-col gap-[2px] mb-[3px] pb-3">
+              <span className="font-semibold text-neutral-30">
+                땡땡님이 관심 있으실만한 카테고리에요!
+              </span>
+              <span className="text-medium20 font-bold text-neutral-0">
+                실시간 땡땡님 맞춤 카테고리
+              </span>
+            </div>
+            <div className='p-1 flex items-center font-semibold gap-[6px] text-neutral-40 border-neutral-40 cursor-pointer hover:text-neutral-30'>
+              <RightArrow />
+              <span className='text-xsmall14'>인기 카테고리 상품들 보러가기</span>
+            </div>
+          </div>
+
+          <div className='flex items-end justify-center h-[240px] gap-6 mb-[40px] border-t-2 border-neutral-80'>
+            {[
+              { rank: '2등', category: '과일', size: 170, bg: 'bg-primary-70/70', delay: 'delay-100' },
+              { rank: '1등', category: '전자제품', size: 200, bg: 'bg-primary-100/70', delay: 'delay-0' },
+              { rank: '3등', category: '학용품', size: 140, bg: 'bg-primary-50/70', delay: 'delay-200' },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className={`
+                  flex flex-col items-center justify-center
+                  rounded-full shadow-xl hover:shadow-2xl ring-1 ring-white/20
+                  ${item.bg} gap-4
+                  transition-transform duration-300 ease-out hover:scale-105
+                `}
+                style={{ width: `${item.size}px`, height: `${item.size}px` }}
+              >
+                <span className='text-neutral-30'>{item.rank}</span>
+                <span className={`
+                  font-bold text-neutral-10
+                  ${item.rank === '1등' ? 'text-large24' : item.rank === '2등' ? 'text-large22' : 'text-medium20'}
+                `}>
+                  {item.category}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
