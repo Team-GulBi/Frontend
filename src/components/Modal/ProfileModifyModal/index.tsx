@@ -16,7 +16,6 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
   const { mutate: updateProfileImage } = usePatchProfileImage();
   const { mutate: updateProfile } = usePatchProfile();
 
-  const [nickname, setNickname] = useState<string>('');
   const [intro, setIntro] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [signature, setSignature] = useState<string | null>(null);
@@ -29,7 +28,6 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
 
   useEffect(() => {
     if (profileData) {
-      setNickname("지니핑");
       setProfileImage(profileData.image);
       setIntro(profileData.intro);
       setPhone(profileData.phone);
@@ -69,7 +67,7 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
   };
   
   const handleSubmit = () => {
-    if (!nickname || !intro || !phone || !sido || !sigungu || !bname) {
+    if (!intro || !phone || !sido || !sigungu || !bname) {
       return;
     }
 
@@ -156,14 +154,13 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
           <div className="flex flex-col gap-3">
             <div className="space-y-1">
               <label className="text-xsmall14 font-bold text-neutral-10">
-                닉네임
+                소개글
               </label>
-              <input
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="text-xxsmall12 w-full rounded-[6px] focus:ring focus:ring-primary-100 border bg-white p-[10px] font-regular text-neutral-10 outline-none"
+              <textarea
+                value={intro}
+                onChange={(e) => setIntro(e.target.value)}
+                className="text-xxsmall12 w-full rounded-[6px] focus:ring focus:ring-primary-100 border bg-white p-[10px] font-regular text-neutral-10 outline-none resize-none"
               />
-              <p className="text-xxsmall10 text-secondary-90 mt-[6px]">※ 닉네임은 2자 이상입니다</p>
             </div>
 
             <div className="space-y-1">

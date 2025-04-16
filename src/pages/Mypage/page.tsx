@@ -29,7 +29,8 @@ const rentedProducts = [
 const MyPage = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'owned' | 'rented'>('owned');
-
+  const userId = Number(localStorage.getItem('userId'));
+  
   return (
     <div className="min-h-screen relative flex w-screen">
       <HeaderWithSearch />
@@ -56,7 +57,7 @@ const MyPage = () => {
             </div>
 
             {isModalOpen && (
-              <ProfileModifyModal setIsModalOpen={setIsModalOpen} userId={64} />
+              <ProfileModifyModal setIsModalOpen={setIsModalOpen} userId={userId} />
             )}
 
             <span className="font-medium text-xsmall14 text-neutral-30">
