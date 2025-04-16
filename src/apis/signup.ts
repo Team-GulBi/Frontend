@@ -10,7 +10,8 @@ export interface SignupRequest {
 export type SignupResponse = string;
 
 const signup = async (data: SignupRequest): Promise<SignupResponse> => {
-  const response = await client.post<SignupResponse>('/auth/signup', data);
+  const response = await client.post<SignupResponse>('/signup', data);
+  window.location.replace("/signup/profile");
   return response.data;
 };
 
