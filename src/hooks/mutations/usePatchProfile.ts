@@ -5,7 +5,7 @@ import { AxiosError } from "axios";
 export interface ProfileRequest {
     image?: string;
     intro: string;
-    phone: string;
+    phone?: string;
     signature?: string;
     sido: string;
     sigungu: string;
@@ -19,7 +19,7 @@ export interface ProfileResponse {
 }
 
 const patchProfile = async (request: ProfileRequest): Promise<ProfileResponse> => {
-    const response = await client.post<ProfileResponse>("/profiles", request);
+    const response = await client.patch<ProfileResponse>("/profiles", request);
     return response.data;
 };
 

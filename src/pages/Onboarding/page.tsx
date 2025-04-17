@@ -2,9 +2,11 @@ import { useRef, useState } from 'react';
 import { ReactComponent as DefaultProfile } from '@/assets/svgs/defaultProfile.svg';
 import { LoginHeader } from '@/components/common/Header';
 import SignatureCanvas from 'react-signature-canvas';
+import { usePatchProfile, usePatchProfileImage, usePatchProfileSignature } from '@/hooks/mutations';
+import { useNavigate } from 'react-router-dom';
 
 const OnboardingPage = () => {
-  const [introduction, setIntroduction] = useState<string>('');
+  const [intro, setIntro] = useState<string>('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [sido, setSido] = useState<string>('');
   const [sigungu, setSigungu] = useState<string>('');
@@ -12,6 +14,12 @@ const OnboardingPage = () => {
   const [showError, setShowError] = useState<boolean>(false);
 
   const sigCanvas = useRef<SignatureCanvas>(null);
+
+  const { mutateAsync: updateProfileImage } = usePatchProfileImage();
+  const { mutateAsync: updateProfileSignature } = usePatchProfileSignature();
+  const { mutateAsync: updateProfile } = usePatchProfile();
+
+  const navigate = useNavigate();
 
   const clearSignature = () => {
     sigCanvas.current?.clear();
@@ -32,10 +40,40 @@ const OnboardingPage = () => {
     else if (name === 'bname') setBname(value);
   };
 
-  const handleSubmit = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (!sido || !sigungu || !bname || sigCanvas.current?.isEmpty()) {
+  const handleSubmit = async () => {  
+    const isSignatureEmpty = sigCanvas.current?.isEmpty();
+    if (!sido || !sigungu || !bname || isSignatureEmpty) {
       setShowError(true);
-      e.preventDefault();
+      return;
+    }
+  
+    try {
+      await updateProfile({
+        intro,
+        sido,
+        sigungu,
+        bname,
+      });
+
+      const signatureData = sigCanvas.current?.toDataURL('image/png');
+      let signatureFile: File | null = null;
+  
+      if (signatureData) {
+        const blob = await fetch(signatureData).then((res) => res.blob());
+        signatureFile = new File([blob], 'signature.png', { type: 'image/png' });
+      }
+  
+      if (signatureFile) {
+        await updateProfileSignature(signatureFile);
+      }
+  
+      if (profileImage) {
+        await updateProfileImage(profileImage);
+      }
+
+      navigate('/');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -59,7 +97,7 @@ const OnboardingPage = () => {
                   <img
                     src={URL.createObjectURL(profileImage)}
                     alt="profile"
-                    className="rounded-full object-cover"
+                    className="w-full h-full rounded-full object-cover"
                   />
                 ) : (
                   <DefaultProfile
@@ -87,9 +125,9 @@ const OnboardingPage = () => {
               <div className="flex-col">
                 <span className="text-medium18 text-neutral-0">소개글</span>
                 <textarea
-                  name="introduction"
-                  value={introduction}
-                  onChange={(e) => setIntroduction(e.target.value)}
+                  name="intro"
+                  value={intro}
+                  onChange={(e) => setIntro(e.target.value)}
                   className="mt-2 w-full resize-none rounded-xs border border-neutral-70 bg-primary-0 p-3 text-small16 text-neutral-0"
                 />
               </div>
@@ -155,13 +193,12 @@ const OnboardingPage = () => {
               </div>
             </div>
           </div>
-          <a
+          <div
             className="flex w-full items-center justify-center rounded-xs border border-neutral-70 bg-secondary-dark px-5 py-[10px]"
-            href="/"
             onClick={handleSubmit}
           >
             <span className="text-small16 text-primary-0">회원가입 완료</span>
-          </a>
+          </div>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 const patchProfileImage = async (file: File) => {
   try {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('image', file);
 
     const response = await client.patch('/profiles/image', formData, {
       headers: {
