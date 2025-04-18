@@ -12,9 +12,9 @@ type ModalProps = {
 
 export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
   const { data: profileData, isLoading } = useGetProfile(userId);
-  const { mutate: updateProfileSignature } = usePatchProfileSignature();
-  const { mutate: updateProfileImage } = usePatchProfileImage();
-  const { mutate: updateProfile } = usePatchProfile();
+  const { mutateAsync: updateProfileSignature } = usePatchProfileSignature();
+  const { mutateAsync: updateProfileImage } = usePatchProfileImage();
+  const { mutateAsync: updateProfile } = usePatchProfile();
 
   const [intro, setIntro] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
@@ -22,22 +22,19 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
   const [sido, setSido] = useState<string>('');
   const [sigungu, setSigungu] = useState<string>('');
   const [bname, setBname] = useState<string>('');
-  const [profileImage, setProfileImage] = useState<File | string | null>(null);
+  const [image, setImage] = useState<File | string | null>(null);
 
   const sigCanvas = useRef<SignatureCanvas>(null);
 
   useEffect(() => {
     if (profileData) {
-      setProfileImage(profileData.image);
       setIntro(profileData.intro);
       setPhone(profileData.phone);
       setSido(profileData.sido);
       setSigungu(profileData.sigungu);
       setBname(profileData.bname);
-
-      if (profileData.signature) {
-        setSignature(profileData.signature);
-      }
+      setImage(profileData.image);
+      setSignature(profileData.signature);
     }
   }, [profileData]);
 
@@ -47,6 +44,7 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
       const ctx = canvas.getContext("2d");
       if (ctx) {
         const img = new Image();
+        img.crossOrigin = 'anonymous';
         img.src = signature;
         img.onload = () => {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -58,7 +56,7 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.size <= 10 * 1024 * 1024) {
-      setProfileImage(file);
+      setImage(file);
     }
   };
 
@@ -66,42 +64,33 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
     sigCanvas.current?.clear();
   };
   
-  const handleSubmit = () => {
-    if (!intro || !phone || !sido || !sigungu || !bname) {
-      return;
-    }
-
-    const signatureData = sigCanvas.current?.toDataURL("image/png");
-    
-    if (signatureData) {
-      fetch(signatureData)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const file = new File([blob], "signature.png", { type: "image/png" });
-          updateProfileSignature(file, {
-            onSuccess: () => console.log("서명 업데이트 완료"),
-          });
-        });
-    }
-
-    if (profileImage && typeof profileImage !== "string") {
-      updateProfileImage(profileImage, {
-        onSuccess: () => console.log("프로필 이미지 업데이트 완료"),
+  const handleSubmit = async () => {
+    try {
+      await updateProfile({
+        image: typeof image === 'string' ? image : undefined,
+        intro,
+        phone,
+        sido,
+        sigungu,
+        bname,
       });
-    }
 
-    updateProfile(
-      { intro, phone, sido, sigungu, bname },
-      {
-        onSuccess: () => {
-          setIsModalOpen(false);
-        },
-        onError: (error) => {
-          console.error(error);
-        }
+      const signatureData = sigCanvas.current?.toDataURL("image/png");
+      if (signatureData) {
+        const blob = await fetch(signatureData).then((res) => res.blob());
+        const file = new File([blob], "signature.png", { type: "image/png" });
+        await updateProfileSignature(file);
       }
-    );
-  };
+  
+      if (image instanceof File) {
+        await updateProfileImage(image);
+      }
+  
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("프로필 수정 실패:", error);
+    }
+  }
 
   return (
     <div className="fixed inset-0 mt-20 flex items-center justify-center bg-black bg-opacity-30 z-50">
@@ -113,16 +102,16 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
         <div className="flex px-[10px]">
           <div className="mr-10 flex flex-col">
             <div className="flex self-center h-[120px] max-h-[120px] w-[120px] max-w-[120px] rounded-full border shadow-md">
-              {profileImage ? (
-                typeof profileImage === 'string' ? (
+              {image ? (
+                typeof image === 'string' ? (
                   <img
-                    src={profileImage}
+                    src={image}
                     alt="Profile"
                     className="rounded-full object-cover"
                   />
                 ) : (
                   <img
-                    src={URL.createObjectURL(profileImage)}
+                    src={URL.createObjectURL(image)}
                     alt="Profile"
                     className="rounded-full object-cover"
                   />
