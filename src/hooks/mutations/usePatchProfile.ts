@@ -3,12 +3,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 export interface ProfileRequest {
-    image: string;
+    image?: string;
     intro: string;
-    phone: string;
-    signature: string;
+    phone?: string;
+    signature?: string;
     sido: string;
-    sigung: string;
+    sigungu: string;
     bname: string;
 }
 
@@ -18,17 +18,17 @@ export interface ProfileResponse {
     data: null;
 }
 
-const postProfile = async (request: ProfileRequest): Promise<ProfileResponse> => {
-    const response = await client.post<ProfileResponse>("/profiles", request);
+const patchProfile = async (request: ProfileRequest): Promise<ProfileResponse> => {
+    const response = await client.patch<ProfileResponse>("/profiles", request);
     return response.data;
 };
 
 
-const usePostProfile = () => {
+const usePatchProfile = () => {
     const queryClient = useQueryClient();
 
     return useMutation<ProfileResponse, AxiosError, ProfileRequest>({
-        mutationFn: postProfile,
+        mutationFn: patchProfile,
         onSuccess: (data) => {
             console.log(data.message);
             queryClient.invalidateQueries({ queryKey: ["profile"] });
@@ -39,4 +39,4 @@ const usePostProfile = () => {
     });
 };
 
-export default usePostProfile;
+export default usePatchProfile;

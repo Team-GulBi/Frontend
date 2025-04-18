@@ -1,67 +1,118 @@
 import { ReactComponent as DefaultProfile } from '@/assets/svgs/defaultProfile.svg';
 import { useEffect, useRef, useState } from 'react';
-import profile from '@/assets/images/profile.png';
 import SignatureCanvas from 'react-signature-canvas';
+import { usePatchProfile, usePatchProfileImage, usePatchProfileSignature } from '@/hooks/mutations';
+import { useGetProfile } from '@/hooks/queries';
+import { ReactComponent as XIcon } from "@/assets/svgs/XIcon.svg";
 
 type ModalProps = {
   setIsModalOpen: (isOpen: boolean) => void;
+  userId: number;
 };
 
-export const ProfileModifyModal = ({ setIsModalOpen }: ModalProps) => {
-  const [nickname, setNickname] = useState<string>('');
-  const [introduction, setIntroduction] = useState<string>('');
-  const [profileImage, setProfileImage] = useState<File | string | null>(null);
+export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
+  const { data: profileData, isLoading } = useGetProfile(userId);
+  const { mutateAsync: updateProfileSignature } = usePatchProfileSignature();
+  const { mutateAsync: updateProfileImage } = usePatchProfileImage();
+  const { mutateAsync: updateProfile } = usePatchProfile();
+
+  const [intro, setIntro] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [signature, setSignature] = useState<string | null>(null);
+  const [sido, setSido] = useState<string>('');
+  const [sigungu, setSigungu] = useState<string>('');
+  const [bname, setBname] = useState<string>('');
+  const [image, setImage] = useState<File | string | null>(null);
 
   const sigCanvas = useRef<SignatureCanvas>(null);
+
+  useEffect(() => {
+    if (profileData) {
+      setIntro(profileData.intro);
+      setPhone(profileData.phone);
+      setSido(profileData.sido);
+      setSigungu(profileData.sigungu);
+      setBname(profileData.bname);
+      setImage(profileData.image);
+      setSignature(profileData.signature);
+    }
+  }, [profileData]);
+
+  useEffect(() => {
+    if (signature && sigCanvas.current) {
+      const canvas = sigCanvas.current.getCanvas();
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = signature;
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+      }
+    }
+  }, [signature]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.size <= 10 * 1024 * 1024) {
-      setProfileImage(file);
+      setImage(file);
     }
   };
 
   const clearSignature = () => {
     sigCanvas.current?.clear();
   };
+  
+  const handleSubmit = async () => {
+    try {
+      await updateProfile({
+        image: typeof image === 'string' ? image : undefined,
+        intro,
+        phone,
+        sido,
+        sigungu,
+        bname,
+      });
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      const mockData = {
-        nickname: '지니핑',
-        introduction: '집 가고 싶어요',
-        profileImage: profile,
-      };
-
-      setNickname(mockData.nickname);
-      setIntroduction(mockData.introduction);
-      setProfileImage(mockData.profileImage);
-    };
-
-    fetchProfileData();
-  }, []);
-
-  const handleSubmit = () => {
-    setIsModalOpen(false);
-  };
+      const signatureData = sigCanvas.current?.toDataURL("image/png");
+      if (signatureData) {
+        const blob = await fetch(signatureData).then((res) => res.blob());
+        const file = new File([blob], "signature.png", { type: "image/png" });
+        await updateProfileSignature(file);
+      }
+  
+      if (image instanceof File) {
+        await updateProfileImage(image);
+      }
+  
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("프로필 수정 실패:", error);
+    }
+  }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="flex flex-col rounded-[12px] bg-white px-[80px] py-[60px] shadow-lg">
-        <div className="mb-[30px] flex">
-          <div className="mr-[80px] flex flex-col gap-[20px]">
-            <div className="flex h-[180px] max-h-[180px] w-[180px] max-w-[180px] self-start rounded-full border border-neutral-60">
-              {profileImage ? (
-                typeof profileImage === 'string' ? (
+    <div className="fixed inset-0 mt-20 flex items-center justify-center bg-black bg-opacity-30 z-50">
+      <div className="flex flex-col max-h-[640px] w-[600px] rounded-[12px] bg-white px-[30px] py-[30px] shadow-lg">
+        <div className='flex items-center justify-between mb-4'>
+          <p className='text-large22 text-neutral-10 font-bold'>프로필 수정하기</p>
+          <XIcon onClick={() => setIsModalOpen(false)} />
+        </div>
+        <div className="flex px-[10px]">
+          <div className="mr-10 flex flex-col">
+            <div className="flex self-center h-[120px] max-h-[120px] w-[120px] max-w-[120px] rounded-full border shadow-md">
+              {image ? (
+                typeof image === 'string' ? (
                   <img
-                    src={profileImage}
-                    alt="Profile Preview"
+                    src={image}
+                    alt="Profile"
                     className="rounded-full object-cover"
                   />
                 ) : (
                   <img
-                    src={URL.createObjectURL(profileImage)}
-                    alt="Profile Preview"
+                    src={URL.createObjectURL(image)}
+                    alt="Profile"
                     className="rounded-full object-cover"
                   />
                 )
@@ -70,12 +121,12 @@ export const ProfileModifyModal = ({ setIsModalOpen }: ModalProps) => {
                   width="80"
                   height="82"
                   viewBox="0 0 18 20"
-                  className="m-[50px] self-center text-neutral-0"
+                  className="m-[40px] self-center text-neutral-0"
                 />
               )}
             </div>
-            <label className="border-grayscale-70 mb-2 flex w-fit cursor-pointer items-center justify-center self-center rounded-[5px] border px-[14px] py-[6px] text-center">
-              <span className="text-xsmall14 text-neutral-20">
+            <label className="border-grayscale-70 mt-3 self-center mb-6 flex w-fit cursor-pointer hover:bg-neutral-90 rounded-[6px] border p-2 text-center">
+              <span className="text-xxsmall12 text-neutral-20">
                 프로필 이미지 업로드
               </span>
               <input
@@ -85,62 +136,82 @@ export const ProfileModifyModal = ({ setIsModalOpen }: ModalProps) => {
                 className="hidden"
               />
             </label>
+
+  
           </div>
 
-          <div className="flex w-[300px] flex-col gap-4">
-            <div className="flex-col">
-              <span className="text-medium18 font-bold text-neutral-0">
-                닉네임
-              </span>
-              <input
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="text-small15 mt-2 w-full rounded-[5px] border border-neutral-60 bg-white p-[10px] font-regular text-neutral-10 outline-none"
-              />
-            </div>
-
-            <div className="flex-col">
-              <span className="text-medium18 font-bold text-neutral-0">
+          <div className="flex flex-col gap-3">
+            <div className="space-y-1">
+              <label className="text-xsmall14 font-bold text-neutral-10">
                 소개글
-              </span>
+              </label>
               <textarea
-                value={introduction}
-                onChange={(e) => setIntroduction(e.target.value)}
-                className="text-small15 mt-2 w-full resize-none rounded-[5px] border border-neutral-60 bg-white p-[10px] font-regular text-neutral-10 outline-none"
+                value={intro}
+                onChange={(e) => setIntro(e.target.value)}
+                className="text-xxsmall12 w-full rounded-[6px] focus:ring focus:ring-primary-100 border bg-white p-[10px] font-regular text-neutral-10 outline-none resize-none"
               />
             </div>
-          </div>
-        </div>
 
-        <div className="mb-[30px] flex-col">
-          <span className="text-medium18 font-bold text-neutral-0">
+            <div className="space-y-1">
+              <label className="text-xsmall14 font-bold text-neutral-10">
+                전화번호
+              </label>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="text-xxsmall12 w-full focus:ring focus:ring-primary-100 rounded-[6px] border bg-white p-[10px] font-regular text-neutral-10 outline-none"
+              />
+              <p className="text-xxsmall10 text-secondary-90 mt-[6px]">※ 전화번호는 -제외 11자리 숫자를 입력해주세요</p>
+            </div>
+
+            <div className='space-y-1'>
+              <label className="text-sm font-bold text-neutral-10">위치</label>
+              <div className="flex gap-2 mt-1">
+                <input value={sido} onChange={(e) => setSido(e.target.value)}
+                  className="w-1/3 text-xxsmall12 w-full focus:ring focus:ring-primary-100 rounded-[6px] border bg-white p-[10px] font-regular text-neutral-10 outline-none"
+                />
+                <input value={sigungu} onChange={(e) => setSigungu(e.target.value)}
+                  className="w-1/3 text-xxsmall12 w-full focus:ring focus:ring-primary-100 rounded-[6px] border bg-white p-[10px] font-regular text-neutral-10 outline-none"
+                />
+                <input value={bname} onChange={(e) => setBname(e.target.value)}
+                  className="w-1/3 text-xxsmall12 w-full focus:ring focus:ring-primary-100 rounded-[6px] border bg-white p-[10px] font-regular text-neutral-10 outline-none"
+                />
+              </div>
+              <p className="text-xxsmall10 text-secondary-90 mt-[6px]">※ 시도, 시군구, 동을 다 입력해주세요</p>
+            </div>
+
+
+            <div className="mb-[20px] flex-col">
+            <label className="text-xsmall14 font-bold text-neutral-10">
             전자 서명
-          </span>
+          </label>
           <button
             onClick={clearSignature}
             className="ml-3 text-xxsmall12 text-neutral-30 underline"
           >
             서명 지우기
           </button>
-          <div className="mt-2 w-full rounded-[5px] border border-neutral-60">
+          <div className="mt-2 w-full rounded-[6px] border">
             <SignatureCanvas
               ref={sigCanvas}
               penColor="black"
               canvasProps={{
-                width: 600,
-                height: 120,
+                width: 400,
+                height: 110,
                 className: 'signatureCanvas',
                 style: { width: "100%" },
               }}
             />
           </div>
         </div>
+          </div>
+        </div>
 
         <div
-          className="text-medium16 w-full rounded-[5px] bg-secondary-70 p-3 text-center font-light text-neutral-100"
+          className="text-medium16 w-full cursor-pointer rounded-[6px] bg-primary-100 p-2 text-center text-neutral-100"
           onClick={handleSubmit}
         >
-          프로필 수정하기
+          완료
         </div>
       </div>
     </div>
