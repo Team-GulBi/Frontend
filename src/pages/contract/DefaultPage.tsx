@@ -1,17 +1,12 @@
 import { HeaderWithoutSearch } from "@/components/common/Header";
 import { ContractInput } from "./components/ContractInput";
 import { useState } from "react";
-import { useCreateContract, useLenderApproval, getContractIdByApplication} from "@/apis/contract";
-import { useQueryClient } from '@tanstack/react-query';
+import { postContract } from "@/apis/contract";
 
 export default function DefaultContractPage() {
   const [isChecked, setIsChecked] = useState(false);
-  // const [contractId, setContractId] = useState<number | null>(null);
-  const [formValues, setFormValues] = useState<any>({});  // To store form values
+  const [formValues, setFormValues] = useState<any>({});
 
-  const createContractMutation = useCreateContract();
-  const lenderApprovalMutation = useLenderApproval();
-  const queryClient = useQueryClient();
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsChecked(event.target.checked);
   };
@@ -21,38 +16,36 @@ export default function DefaultContractPage() {
       alert("계약 정보를 모두 입력해주세요.");
       return;
     }
-  
-    try {
-      // 1. 계약 생성 API 호출
-      // 날짜 변환
-    const formattedValues = {
-      ...formValues,
-      rentalEndDate: new Date(formValues.rentalEndDate).toISOString(),
-      returnDate: new Date(formValues.returnDate).toISOString(),
-      paymentDate: new Date(formValues.paymentDate).toISOString(),
-      createdDate: new Date(formValues.createdDate).toISOString(),
-    };
 
-      await createContractMutation.mutateAsync({
-        contractData: formattedValues,
-        applicationId: 1
-      });
-      // 2. 계약 ID 가져오기
-      
-      const contractIdResponse = await queryClient.fetchQuery({
-        queryKey: ['getContractIdByApplication', 1],
-        queryFn: () => getContractIdByApplication(1) //applicationId 임시 상수로 설정
-      });
-      
-      // 응답이 배열 형태이므로 첫 번째 요소의 id를 가져옵니다.
-      const contractId = contractIdResponse[0]?.id;
-      if (contractId === undefined) {
-        throw new Error("Contract ID is undefined");
+    try {
+      const productId = 1;
+
+      const startDate = new Date("2025-08-07T00:00:00.000Z");
+      const endDate = new Date("2025-08-08T00:00:00.000Z");
+      if (startDate.getTime() === endDate.getTime()) {
+        alert("시작일과 종료일이 같으면 계약서를 생성할 수 없습니다.");
+        return;
       }
-      // 3. 계약 승인 API 호출
-      await lenderApprovalMutation.mutateAsync(contractId);
-  
-      alert("계약서가 성공적으로 생성성되었습니다.");
+
+      const contractData = {
+        ...formValues,
+        rentalEndDate: new Date(formValues.rentalEndDate).toISOString(),
+        returnDate: new Date(formValues.returnDate).toISOString(),
+        paymentDate: new Date(formValues.paymentDate).toISOString(),
+      };
+
+      const applicationData = {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      };
+
+      await postContract({
+        productId,
+        contractData,
+        applicationData,
+      });
+
+      alert("계약서가 성공적으로 생성되었습니다.");
     } catch (error) {
       console.error("계약 처리 중 오류 발생:", error);
       alert("계약 처리 중 문제가 발생했습니다.");
@@ -74,8 +67,8 @@ export default function DefaultContractPage() {
           }}
         >
           <ContractInput
-             {...formValues}  // contractData 상태 전달
-             onInputChange={setFormValues}  // setContractData 함수 전달
+            {...formValues}
+            onInputChange={setFormValues}
           />
         </div>
       </div>
@@ -94,7 +87,7 @@ export default function DefaultContractPage() {
 
         {isChecked && (
           <button
-            className="mt-4 px-6 py- bg-[#357fff] text-white rounded-lg hover:scale-[105%]"
+            className="mt-4 px-6 py-2 bg-[#357fff] text-white rounded-lg hover:scale-[105%]"
             onClick={handleCompleteClick}
           >
             <span className="text-[17px]">완료</span>

@@ -11,15 +11,43 @@ import client from "./client";
 //     },
 //   });
 // };
-export const useCreateContract = () => {
-    return useMutation({
-      mutationFn: async ({ applicationId, contractData }: { applicationId: number; contractData: any }) => {
-        const { data } = await client.post(`/application/${applicationId}/contracts`, contractData);
-        return data;
-      },
-    });
-  };
+// export const useCreateContract = () => {
+//     return useMutation({
+//       mutationFn: async ({ applicationId, contractData }: { applicationId: number; contractData: any }) => {
+//         const { data } = await client.post(`/application/${applicationId}/contracts`, contractData);
+//         return data;
+//       },
+//     });
+//   };
+  // 단순 axios 함수로 대체
+export const postContract = async ({
+  productId,
+  contractData,
+  applicationData,
+}: {
+  productId: number;
+  contractData: Record<string, any>;
+  applicationData: Record<string, any>;
+}) => {
+  const formData = new FormData();
 
+  formData.append(
+    "contractCreateRequest",
+    new Blob([JSON.stringify(contractData)], { type: "application/json" })
+  );
+  formData.append(
+    "applicationCreateRequest",
+    new Blob([JSON.stringify(applicationData)], { type: "application/json" })
+  );
+
+  const { data } = await client.post(`/application/contracts/${productId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return data;
+};
 // 2. 특정 계약서 조회 (Borrower가 확인)
 export const useGetContract = (contractId: number) => {
   return useQuery({
@@ -47,7 +75,7 @@ export const useLenderApproval = () => {
       return data;
     },
     onSuccess: (_, contractId) => {
-      queryClient.invalidateQueries(QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId));
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId) });
     },
   });
 };
@@ -61,7 +89,7 @@ export const useBorrowerApproval = () => {
       return data;
     },
     onSuccess: (_, contractId) => {
-      queryClient.invalidateQueries(QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId));
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId) });
     },
   });
 };
@@ -91,7 +119,7 @@ export const useUploadContractFile = () => {
       return data;
     },
     onSuccess: (_, { contractId }) => {
-      queryClient.invalidateQueries(QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId));
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId) });
     },
   });
 };

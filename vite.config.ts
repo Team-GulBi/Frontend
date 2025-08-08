@@ -20,6 +20,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/s3/, ""),
       },
+    "/api": {
+      target: "http://54.180.162.59:8080", // 포트 포함
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, "/api"), // 또는 생략 가능
+    },
     },
   },
 });
