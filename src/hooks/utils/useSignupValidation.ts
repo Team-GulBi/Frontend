@@ -11,18 +11,21 @@ interface SignupFields {
   id: string;
   password: string;
   phone: string;
+  signature: boolean;
 }
 
 export const useSignupValidation = (
   checkboxes: CheckboxItem[],
   fields: SignupFields,
+  signatureFilled: boolean,
 ) => {
   const [showError, setShowError] = useState({
     checkboxError: false,
     nameError: false,
     idError: false,
     passwordError: false,
-    phoneError: false
+    phoneError: false,
+    signatureError: false,
   });
 
   const validateCheckboxes = () => {
@@ -37,14 +40,23 @@ export const useSignupValidation = (
       !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]*$/.test(fields.password);
     const phoneRegex = /^010\d{8}$/;
     const phoneError = !phoneRegex.test(fields.phone);
+    const signatureError = !signatureFilled;
 
-    if (requiredUnchecked || nameError || idError || passwordError || phoneError) {
+    if (
+      requiredUnchecked ||
+      nameError ||
+      idError ||
+      passwordError ||
+      phoneError ||
+      signatureError
+    ) {
       setShowError({
         checkboxError: requiredUnchecked,
         nameError,
         idError,
         passwordError,
         phoneError,
+        signatureError,
       });
       return false;
     }
@@ -55,6 +67,7 @@ export const useSignupValidation = (
       idError: false,
       passwordError: false,
       phoneError: false,
+      signatureError: false,
     });
     return true;
   };

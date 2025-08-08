@@ -12,7 +12,7 @@ export const AllCheckbox = ({allChecked, toggleAll}: AllCheckboxProps) => {
         onChange={(e) => toggleAll(e.target.checked)}
         className="h-4 w-4"
       />
-      <label className="text-medium18 font-medium text-neutral-10">
+      <label className="text-medium20 font-semibold text-neutral-10">
         전체 동의
       </label>
     </div>
@@ -34,7 +34,7 @@ export const Checkbox = ({labelText, checked, onChange}: CheckboxProps) => {
         onChange={onChange}
         className="h-3 w-3"
       />
-      <label className="text-xsmall14 font-light text-neutral-10">
+      <label className="text-small16 text-neutral-0">
         {labelText}
       </label>
     </div>
