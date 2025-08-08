@@ -1,36 +1,81 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/libraries/reactQuery/queryKeys";
+// src/apis/contract.ts
 import client from "./client";
 
-// 1. 계약서 생성 (Lender가 입력)
-// export const useCreateContract = () => {
-//   return useMutation({
-//     mutationFn: async ({ applicationId, contractData }: { applicationId: number; contractData: any }) => {
-//       const { data } = await client.post(`/application/${applicationId}/contracts`, contractData);
-//       return data;
-//     },
-//   });
-// };
-// export const useCreateContract = () => {
-//     return useMutation({
-//       mutationFn: async ({ applicationId, contractData }: { applicationId: number; contractData: any }) => {
-//         const { data } = await client.post(`/application/${applicationId}/contracts`, contractData);
-//         return data;
-//       },
-//     });
-//   };
-  // 단순 axios 함수로 대체
-export const postContract = async ({
+/** 공통 API 응답 타입 */
+export type ApiResponse<T> = {
+  status: string;   // "OK"
+  code: string;     // "C001" ...
+  message: string;  // 메시지
+  data: T;
+};
+
+/** 계약서 단건 (applicationId로 조회되는 전체 스키마) */
+export type ContractDTO = {
+  id: number; // = contractId
+  itemName: string;
+  specifications: string;
+  quantity: number;
+  condition: string;
+  notes: string;
+  rentalEndDate: string;       // "2025-08-16T00:00:00"
+  rentalPlace: string;
+  rentalDetailAddress: string;
+  returnDate: string;          // "2025-08-19T00:00:00"
+  returnPlace: string;
+  returnDetailAddress: string;
+  rentalFee: number;
+  paymentDate: string;         // "2025-08-15T00:00:00"
+  lateInterestRate: number;
+  latePenaltyRate: number;
+  damageCompensationRate: number;
+  lenderApproval: boolean;
+  borrowerApproval: boolean;
+  url: string;
+  lenderSignature: string;     // s3 url
+  borrowerSignature: string;   // s3 url
+};
+
+/** (1) applicationId로 계약서 전체 조회 */
+export async function getContractByApplicationId(applicationId: number) {
+  const { data } = await client.get<ApiResponse<ContractDTO>>(
+    `/application/contracts/applications/${applicationId}`
+  );
+  return data; // ApiResponse<ContractDTO>
+}
+
+/** (2) Lender 승인: 최종 캡처본 업로드 (multipart/form-data, key=finalContract) */
+export async function putLenderApproval(params: {
+  contractId: number;
+  file: File | Blob; // canvas 캡처 Blob/파일
+  filename?: string; // 선택: Blob일 때 서버가 확장자 유추 못 하면 넣어주기
+}) {
+  const { contractId, file, filename } = params;
+  const form = new FormData();
+  // 서버 명세: 필드명은 finalContract
+  // Blob에 파일명이 없을 경우를 대비해 기본값 부여
+  form.append("finalContract", file, filename ?? "final_contract.png");
+
+  const { data } = await client.put<ApiResponse<null>>(
+    `/application/contracts/${contractId}/lender-approval`,
+    form,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
+  return data; // ApiResponse<null>
+}
+
+/** (3) (참고) 계약 생성 API — 이전 작업물 유지가 필요하면 남겨둠 */
+export async function postContract({
   productId,
   contractData,
   applicationData,
 }: {
-  productId: number;
+  productId: number; // 임시 1
   contractData: Record<string, any>;
-  applicationData: Record<string, any>;
-}) => {
+  applicationData: { startDate: string; endDate: string };
+}) {
   const formData = new FormData();
-
   formData.append(
     "contractCreateRequest",
     new Blob([JSON.stringify(contractData)], { type: "application/json" })
@@ -40,86 +85,10 @@ export const postContract = async ({
     new Blob([JSON.stringify(applicationData)], { type: "application/json" })
   );
 
-  const { data } = await client.post(`/application/contracts/${productId}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
+  const { data } = await client.post<ApiResponse<any>>(
+    `/application/contracts/${productId}`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
   return data;
-};
-// 2. 특정 계약서 조회 (Borrower가 확인)
-export const useGetContract = (contractId: number) => {
-  return useQuery({
-    queryKey: QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId),
-    queryFn: async () => {
-      const { data } = await client.get(`/application/1/contracts/${contractId}`);
-      return data;
-    },
-    enabled: !!contractId,
-  });
-};
-
-// 3. applicationId로 contractId 조회
-export const getContractIdByApplication = async (applicationId: number) => {
-    const { data } = await client.get(`/application/${applicationId}/contracts`);
-    return data;
-  };
-
-// 4. Lender 승인
-export const useLenderApproval = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (contractId: number) => {
-      const { data } = await client.put(`/application/1/contracts/${contractId}/lender-approval`);
-      return data;
-    },
-    onSuccess: (_, contractId) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId) });
-    },
-  });
-};
-
-// 5. Borrower 승인
-export const useBorrowerApproval = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (contractId: number) => {
-      const { data } = await client.put(`/application/1/contracts/${contractId}/borrower-approval`);
-      return data;
-    },
-    onSuccess: (_, contractId) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId) });
-    },
-  });
-};
-
-// 6. 계약서 이미지 업로드
-export const useUploadContractFile = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ contractId, file }: { contractId: number; file: FormData }) => {
-    //   const formData = new FormData();
-    //   formData.append("file", file);
-    // axios 설정 로깅
-    console.log('업로드 시작:', { contractId });
-    const { data } = await client.post(`/application/1/contracts/${contractId}/file`, file,
-        {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              // axios가 자동으로 boundary를 설정하도록 하기 위해 
-              // 다른 헤더는 제거
-            },
-            // FormData 전송 시 변환 방지
-            transformRequest: [function (data) {
-              return data;
-            }],
-          }
-    );
-      return data;
-    },
-    onSuccess: (_, { contractId }) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CONTRACT.GET_CONTRACT(contractId) });
-    },
-  });
-};
+}

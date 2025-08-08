@@ -16,7 +16,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/s3": {
-        target: "https://yajoba.s3.ap-northeast-2.amazonaws.com",
+        target: "https://yazoba-img-s3.s3.ap-northeast-2.amazonaws.com",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/s3/, ""),
       },
