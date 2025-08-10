@@ -6,7 +6,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  id: number;
+  id: string;
   token: string; // 서버응답 토큰
 }
 
