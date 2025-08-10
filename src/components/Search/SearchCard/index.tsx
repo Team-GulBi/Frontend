@@ -2,8 +2,9 @@ import { RentedChip } from '@/components/common/ProductStatusChip';
 import { useNavigate } from 'react-router-dom';
 
 export type SearchCardProps = {
+  productId: number;
   productNm: string;
-  productPrice: number;
+  productPrice: string;
   productPlace: string;
   productImg: string;
   userImg: string;
@@ -11,6 +12,7 @@ export type SearchCardProps = {
 };
 
 export const SearchCard = ({
+  productId,
   productNm,
   productPrice,
   productPlace,
@@ -18,20 +20,19 @@ export const SearchCard = ({
   userImg,
   userNm,
 }: SearchCardProps) => {
-  const formattedPrice = new Intl.NumberFormat().format(productPrice);
   const navigate = useNavigate();
 
   const handleProduct = () => {
-    navigate('/product/1');
+    navigate(`/product/${productId}`);
   };
 
   return (
     <div
-      className="flex w-full cursor-pointer gap-[50px] rounded-[8px] bg-white"
+      className="flex w-full cursor-pointer gap-[50px] rounded-[8px] bg-white shadow-lg"
       onClick={handleProduct}
     >
       <div className="relative">
-        <img src={productImg} alt="product image" className="rounded-xs" />
+        <img src={productImg} alt="product image" className="p-3 w-[220px] h-[220px] object-contain" />
         <RentedChip className="absolute left-0 top-0" />
       </div>
       <div className="flex flex-col py-[30px]">
@@ -39,7 +40,7 @@ export const SearchCard = ({
           {productNm}
         </span>
         <span className="font-regular mb-[6px] text-small16 text-neutral-0">
-          {formattedPrice}원
+          {productPrice}원
         </span>
         <span className="font-regular mb-[34px] text-xsmall14 text-neutral-60">
           {productPlace}

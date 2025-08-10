@@ -23,17 +23,21 @@ export const HeaderWithSearch = () => {
   const isProductPage = useActiveLink('/product');
   const isChatPage = useActiveLink('/chat');
   const isMypage = useActiveLink('/profile');
-  const [selectedFilter, setSelectedFilter] = useState('상품명');
+  const [selectedFilter, setSelectedFilter] = useState('제목');
+  const [searchInput, setSearchInput] = useState("");
 
   const navigate = useNavigate();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const keyword = e.currentTarget.value.trim();
-      // 필터링 된 값 추후에 쿼리로 보낼 예정
-      if (keyword) {
-        navigate('/search');
-      }
+    if (e.key === "Enter") {
+      searchProduct();
+    }
+  };
+
+  const searchProduct = () => {
+    const keyword = searchInput.trim();
+    if (keyword) {
+      navigate(`/search?query=${encodeURIComponent(keyword)}&detail=${encodeURIComponent(selectedFilter)}`);
     }
   };
 
@@ -45,8 +49,30 @@ export const HeaderWithSearch = () => {
             <img className="h-full" src={logo} alt="야줘바 로고" />
           </a>
 
-          <div className="flex items-center gap-[20px]">
-            <div className="mt-2 flex items-center gap-1 rounded-sm border border-neutral-75 px-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center rounded-md border border-neutral-70 pl-2 pr-5">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                  className="mr-2 flex w-[100px] items-center justify-between bg-neutral-90 text-xsmall14 text-neutral-30">
+                    <span>{selectedFilter}</span>
+                    <Dropdown className="pt-[3px]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="font-regular bg-white py-[6px] text-xsmall14 text-neutral-10">
+                  <DropdownMenuItem onClick={() => setSelectedFilter('제목')}>제목</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSelectedFilter('태그')}>태그</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSelectedFilter('장소')}>장소</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="원하시는 상품을 입력해주세요"
+                className="text-small15 h-1/2 w-[33rem] border-none py-4 pl-1 pr-3 text-neutral-10 placeholder-neutral-50 outline-none"
+                onKeyDown={handleKeyDown}
+              />
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="17"
@@ -63,33 +89,7 @@ export const HeaderWithSearch = () => {
                   strokeLinejoin="round"
                 />
               </svg>
-
-              <input
-                type="text"
-                placeholder="원하시는 상품을 입력해주세요"
-                className="h-1/2 w-[33rem] border-none px-3 py-[12px] text-small17 text-neutral-10 placeholder-neutral-50 outline-none"
-                onKeyDown={handleKeyDown}
-              />
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="mt-2 flex h-full min-w-[110px] items-center justify-between rounded-sm border border-neutral-75 bg-white py-[12px] text-medium20 text-neutral-30">
-                  <span>{selectedFilter}</span>
-                  <Dropdown className="self-center pt-[3px]" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white py-2 text-medium18 font-medium text-neutral-40">
-                <DropdownMenuItem onClick={() => setSelectedFilter('상품명')}>
-                  상품명
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedFilter('카테고리')}>
-                  카테고리
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedFilter('장소')}>
-                  장소
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
 

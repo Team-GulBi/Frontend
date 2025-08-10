@@ -1,5 +1,4 @@
 import profile from '@/assets/images/profile.png';
-import { ReactComponent as SelfIntroduction } from '@/assets/svgs/selfIntroduction.svg';
 import { ReactComponent as Bag } from '@/assets/svgs/bag.svg';
 import { ReactComponent as Cart } from '@/assets/svgs/cart.svg';
 import { ReactComponent as EditProfile } from '@/assets/svgs/editProfile.svg';
@@ -8,43 +7,30 @@ import product2 from '@/assets/images/product2.jpeg';
 import product3 from '@/assets/images/product3.jpeg';
 import product4 from '@/assets/images/product4.jpeg';
 import product5 from '@/assets/images/product5.jpeg';
-import { ProfileStatusChip } from '@/components/common/ProfileStatusChip';
 import { useState } from 'react';
 import { ProfileModifyModal } from '@/components/Modal/ProfileModifyModal';
 import { ProductCard } from '@/components/common/ProductCard';
 import { HeaderWithSearch } from '@/components/common/Header';
 
-const products = [
-  {
-    name: '맥북 프로 실버',
-    imageSrc: product1,
-    status: '대여중',
-  },
-  {
-    name: '자전거',
-    imageSrc: product2,
-    status: '대여 마감',
-  },
-  {
-    name: '아이폰 14 Pro',
-    imageSrc: product3,
-    status: '예약중',
-  },
-  {
-    name: '에어팟 맥스',
-    imageSrc: product4,
-    status: '대여 가능',
-  },
-  {
-    name: '에어팟',
-    imageSrc: product5,
-    status: '대여 가능',
-  },
+const ownedProducts = [
+  { name: '맥북 프로 실버', imageSrc: product1, price: 5000 },
+  { name: '자전거', imageSrc: product2, price: 5000 },
+  { name: '아이폰 14 Pro', imageSrc: product3, price: 5000 },
+  { name: '맥북 프로 실버', imageSrc: product1, price: 5000 },
+  { name: '자전거', imageSrc: product2, price: 5000 },
+  { name: '아이폰 14 Pro', imageSrc: product3, price: 5000 },
+];
+
+const rentedProducts = [
+  { name: '에어팟 맥스', imageSrc: product4, price: 5000 },
+  { name: '에어팟', imageSrc: product5, price: 5000 },
 ];
 
 const MyPage = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
+  const [activeTab, setActiveTab] = useState<'owned' | 'rented'>('owned');
+  const userId = Number(localStorage.getItem('userId'));
+  
   return (
     <div className="min-h-screen relative flex w-screen">
       <HeaderWithSearch />
@@ -53,83 +39,65 @@ const MyPage = () => {
           <img
             src={profile}
             alt="profile"
-            className="mr-[40px] h-[180px] w-[180px] rounded-full border p-3"
+            className="mr-[30px] h-[140px] w-[140px] rounded-full p-3 border border-neutral-80 shadow-md"
           />
           <div className="w-full flex-col">
             <div className="flex justify-between">
               <div className="flex gap-3">
-                <div className="mb-[4px] text-xxlarge32 font-semibold text-neutral-0">
+                <div className="text-xlarge28 font-semibold text-neutral-0">
                   지니핑
-                  <span className="self-center pl-[3px] text-xlarge26 font-semibold text-placeholder">
-                    님
-                  </span>
                 </div>
                 <EditProfile onClick={() => setIsModalOpen(true)} />
               </div>
-              <div className="flex gap-5">
+              {/* <div className="flex gap-5">
                 <ProfileStatusChip title="대여상품" number={8} />
                 <ProfileStatusChip title="예약상품" number={10} />
                 <ProfileStatusChip title="작성후기" number={16} />
-              </div>
+              </div> */}
             </div>
 
             {isModalOpen && (
-              <ProfileModifyModal setIsModalOpen={setIsModalOpen} />
+              <ProfileModifyModal setIsModalOpen={setIsModalOpen} userId={userId} />
             )}
 
-            <div className="flex gap-1">
-              <SelfIntroduction />
-              <span className="font-regular text-xsmall16 text-neutral-40">
-                집 가고 싶어요
-              </span>
-            </div>
+            <span className="font-medium text-xsmall14 text-neutral-30">
+              집 가고 싶어요
+            </span>
           </div>
         </div>
-        <div className="mb-[40px] flex-col">
-          <div className="mb-[25px] border-b border-t border-neutral-80 p-3">
-            <div className="flex items-center justify-center gap-2">
+
+          <div className="mb-[20px] flex space-x-3 pb-1">
+          <button
+              className={`flex items-center gap-1 px-6 py-3 rounded-md shadow-md ${
+                activeTab === 'owned' ? 'bg-secondary-90 text-neutral-100 font-bold' : 'bg-secondary-10 text-neutral-10 font-regular'
+              }`}
+              onClick={() => setActiveTab('owned')}
+            >
               <Bag />
-              <span className="text-center text-medium18 font-semibold text-neutral-0">
-                지니핑님 상품
-              </span>
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {products.map((product, index) => (
-                <ProductCard
-                  key={index}
-                  name={product.name}
-                  imageSrc={product.imageSrc}
-                  status={product.status}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="mb-[40px] flex-col">
-          <div className="mb-[25px] border-b border-t border-neutral-80 p-3">
-            <div className="flex items-center justify-center gap-2">
+              <span className="text-small16 font-semibold">지니핑님 상품</span>
+            </button>
+
+            <button
+              className={`flex items-center gap-1 px-6 py-3 rounded-md shadow-md ${
+                activeTab === 'rented' ? 'bg-secondary-90 text-neutral-100 font-bold' : 'bg-secondary-10 text-neutral-10 font-regular'
+              }`}
+              onClick={() => setActiveTab('rented')}
+            >
               <Cart />
-              <span className="text-center text-medium18 font-semibold text-neutral-0">
-                대여중인 상품
-              </span>
-            </div>
+              <span className="text-small16 font-semibold">대여중인 상품</span>
+            </button>
           </div>
+
           <div className="flex justify-center">
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {products.map((product, index) => (
-                <ProductCard
-                  key={index}
-                  name={product.name}
-                  imageSrc={product.imageSrc}
-                  status={product.status}
-                />
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-5">
+              {(activeTab === 'owned' ? ownedProducts : rentedProducts).map((product, index) => (
+                <ProductCard key={index} name={product.name} imageSrc={product.imageSrc} price={product.price} productId={1}/>
               ))}
             </div>
           </div>
+
         </div>
-      </div>
+
     </div>
   );
 };
