@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle } from "react";
 import html2canvas from "html2canvas";
-import { fetchImage } from "@/apis/imageProxy";
+// import { fetchImage } from "@/apis/imageProxy";
 
 interface ContractProps {
   lender: string;
@@ -84,12 +84,12 @@ export const ContractCompleted = ({
     const load = async () => {
       try {
         if (borrowerSignatureUrl) {
-          const url = await fetchImage(borrowerSignatureUrl);
+          const url = borrowerSignatureUrl;
           revoked.push(url);
           setBorrowerSigObjUrl(url);
         }
         if (lenderSignatureUrl) {
-          const url = await fetchImage(lenderSignatureUrl);
+          const url = lenderSignatureUrl;
           revoked.push(url);
           setLenderSigObjUrl(url);
         }
@@ -308,7 +308,7 @@ export const ContractCapture = forwardRef<any, ContractCaptureProps>((props, ref
       const canvas = await html2canvas(el, {
         scale: 2,
         useCORS: true, // 프록시(ObjectURL)로 넣었기 때문에 taint 방지
-        allowTaint: true,
+        allowTaint: false,
         width: el.scrollWidth,
         height: el.scrollHeight,
       });

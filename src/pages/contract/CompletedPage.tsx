@@ -11,7 +11,7 @@ export default function CompletedContractPage() {
   const [contractId, setContractId] = useState<number | null>(null);
 
   // 임시 하드코딩 (추후 상위 컴포넌트에서 prop으로 전달 예정)
-  const applicationId = 15;
+  const applicationId = 1;
 
   useEffect(() => {
     const load = async () => {

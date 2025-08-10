@@ -15,11 +15,6 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/s3": {
-        target: "https://yazoba-img-s3.s3.ap-northeast-2.amazonaws.com",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/s3/, ""),
-      },
     "/api": {
       target: "http://54.180.162.59:8080", // 포트 포함
       changeOrigin: true,
