@@ -16,10 +16,10 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8080", // 백엔드 주소
+        target: "http://54.180.162.59/:8080",
         changeOrigin: true,
         secure: false,
-        // rewrite: (path) => path.replace(/^\/api/, ""), // "/api"를 제거하고 백엔드로 전달
+        rewrite: (path) => path.replace(/^\/api/, "/api/v1"), // ✅ 핵심!
       },
       "/ws-stomp": {
         target: "ws://localhost:8080", // 백엔드 주소

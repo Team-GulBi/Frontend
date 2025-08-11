@@ -3,6 +3,7 @@ import { useChatStore } from "@/libraries/stores/useChatStore";
 import { useChatSocket } from "@/libraries/stores/useChatSocket";
 import { useUserStore } from "@/libraries/stores";
 import { convertToKST } from "../date";
+import type { Message } from "@/libraries/stores/useChatStore";
 
 interface ChatMessageProps {
   chatRoomId: number;
@@ -27,17 +28,17 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
   };
   const [prevChatLog, setPrevChatLog] = useState("");
 
-  useEffect(() => {
-    if (chatRoomId) {
-      fetchMessages(chatRoomId)
-        .then(() => {
-          console.log("✅ 채팅 내역 불러오기 완료:", chatRoomId);
-          // const loadedMessages = useChatStore.getState().messages[chatRoomId];
-          // console.log("📦 불러온 메시지:", loadedMessages);  // ✅ 여기 확인!
-        })
-        .catch((err) => console.error("❌ 채팅 내역 불러오기 실패:", err));
-    }
-  }, [chatRoomId]);
+  // useEffect(() => {
+  //   if (chatRoomId) {
+  //     fetchMessages(chatRoomId)
+  //       .then(() => {
+  //         console.log("✅ 채팅 내역 불러오기 완료:", chatRoomId);
+  //         // const loadedMessages = useChatStore.getState().messages[chatRoomId];
+  //         // console.log("📦 불러온 메시지:", loadedMessages);  // ✅ 여기 확인!
+  //       })
+  //       .catch((err) => console.error("❌ 채팅 내역 불러오기 실패:", err));
+  //   }
+  // }, [chatRoomId]);
   
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -81,6 +82,12 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
   }
 }, [chatMessages, prevChatLog]);
 
+  const isMyMessageRead = (message: Message): boolean => {
+    return (
+      message.senderId === myUserId && // 내가 보낸 메시지이고
+      (message.receiverId !== null || message.isRead === true) // 상대가 받았다고 판단
+    );
+  };
   return (
     <div className="flex h-[650px] w-[800px] flex-col rounded-[16px] bg-white shadow-lg">
       <div className="flex w-full items-center justify-between rounded-t-[16px] bg-white py-4 px-6">
@@ -106,7 +113,7 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
               {showDate && (
                 <div className="flex w-full justify-center">
                   <span className="mb-6 mt-7 text-xsmall14 font-medium text-neutral-50">
-                  {convertToKST(message.timestamp, "date") || "날짜 없음음"}
+                  {convertToKST(message.timestamp, "date") || "날짜 없음"}
                   </span>
                 </div>
               )}
@@ -127,6 +134,12 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
                     </span>
                   )}
                 </div>
+                {/* ✅ 읽음 여부 표시 */}
+                {isMyMessage && (
+                  <span className="mt-1 text-[10px] text-neutral-40">
+                    {isMyMessageRead(message) ? "읽음" : "전송됨"}
+                  </span>
+                )}
               </div>
             </div>
           );

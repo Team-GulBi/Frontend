@@ -14,7 +14,7 @@ import { useChatStore } from "@/libraries/stores/useChatStore";
 
 const ChatPage = () => {
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
-  const { chatRooms, fetchChatRooms } = useChatStore();
+  const { chatRooms, markMessagesAsReadInRoomAsync, fetchChatRooms } = useChatStore();
   const myUserId = Number(useUserStore((state) => state.userId));
   const { connect, disconnect, isConnected } = useChatSocket();
 
@@ -86,18 +86,40 @@ const ChatPage = () => {
             ) : (
               chatRooms.map((room) => {
                 if (!myUserId) return null;
+                
                 const isUser1 = room.user1Id === myUserId;
                 const otherUserNickname = isUser1 ? room.user2Nickname : room.user1Nickname;
+                
+                const roomMessages = useChatStore.getState().messages[room.id] || [];
+                const lastMessage = roomMessages[roomMessages.length - 1];
+                const recentMessage = lastMessage?.content || "메시지가 없습니다";
+
+                // 시간 변환
+                const timestamp = lastMessage?.timestamp;
+                const kstTime = timestamp ? new Date(timestamp) : null;
+                const time =
+                  kstTime !== null
+                    ? `${String(kstTime.getHours()).padStart(2, "0")}:${String(kstTime.getMinutes()).padStart(2, "0")}`
+                    : "시간 없음";
+
+                // 안 읽은 메시지 수 (내가 보낸 메시지는 제외)
+                const unreadCount = roomMessages.filter(
+                  (msg) => msg.senderId !== myUserId && !msg.isRead
+                ).length;
                 return (
                   <ChatRoomListItem
                     key={room.id}
                     name={otherUserNickname}
                     product="상품"
                     imgSrc="/default-profile.png"
-                    time="시간"
-                    recentMessage="최근 메시지"
-                    chats={0}
-                    onClick={() => setSelectedRoomId(room.id)}
+                    time={time}
+                    recentMessage={recentMessage}
+                    chats={unreadCount}
+                    onClick={async () => {
+                         
+                      setSelectedRoomId(room.id);                             // ✅ 채팅방 열기
+                      await markMessagesAsReadInRoomAsync(room.id, myUserId); // ✅ 읽음 처리
+                    }}
                   />
                 );
               })

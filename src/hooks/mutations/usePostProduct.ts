@@ -52,9 +52,9 @@ const postProduct = async (request: ProductRequest): Promise<ProductDetailRespon
     });
 
   const response = await client.post<ProductDetailResponse>('/products', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+    // headers: {
+    //   // 'Content-Type': 'multipart/form-data',
+    // },
   });
 
   return response.data;

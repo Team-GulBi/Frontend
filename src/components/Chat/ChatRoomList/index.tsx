@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { useChatStore } from "@/libraries/stores/useChatStore";
 import { useUserStore } from "@/libraries/stores";
 import { ChatRoomListItem } from "./chatRoomListItem";
-
+import { convertToKST } from "@/components/Chat/date"; 
 
 const ChatRoomList = ({ onSelectRoom }: { onSelectRoom: (roomId: number) => void }) => {
-  const { chatRooms, fetchChatRooms } = useChatStore();
+  const { chatRooms, messages, fetchChatRooms } = useChatStore();
   const myUserId = useUserStore((state) => state.userId);
   
   useEffect(() => {
@@ -33,15 +33,24 @@ const ChatRoomList = ({ onSelectRoom }: { onSelectRoom: (roomId: number) => void
 
           console.log(`🟢 채팅방 ${index} - 이름: ${otherUserNickname}, ID: ${room.id}`);
 
+          const roomMessages = messages[room.id] || [];
+          const lastMessage = roomMessages[roomMessages.length - 1];
+          const recentMessage = lastMessage?.content || "메시지가 없습니다";
+          const time = convertToKST(lastMessage?.timestamp); // ✅ 한국시간 포맷
+          const unreadCount = roomMessages.filter(
+            (msg) => msg.senderId !== myUserId && !msg.isRead
+          ).length;
+
           return (
             <ChatRoomListItem
               key={room.id}
               name={otherUserNickname}
               product="상품명"
               imgSrc="/default-profile.png"
-              time="시간"
-              recentMessage="최근 메시지"
-              chats={0}
+              time={time}
+              recentMessage={recentMessage}
+              chats={unreadCount}
+
               onClick={() => onSelectRoom(room.id)}
             />
           );

@@ -36,7 +36,7 @@ interface ChatProps {
                   {product}
                 </span>
               </div>
-              <span className="font-regular text-xxsmall10 text-neutral-0">
+              <span className="font-regular text-xxsmall10 text-neutral-50">
                 {recentMessage}
               </span>
             </div>

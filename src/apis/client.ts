@@ -3,9 +3,9 @@ import axios, { InternalAxiosRequestConfig } from 'axios';
 const client = axios.create({
   baseURL: import.meta.env.VITE_YAJOBA_SEVER_URL,
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // headers: {
+  //   'Content-Type': 'application/json',
+  // },
 });
 
 client.interceptors.request.use(

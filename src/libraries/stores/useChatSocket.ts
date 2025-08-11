@@ -76,7 +76,7 @@ const stompClient = new Client({
 
 export const useChatSocket = create<ChatSocketState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       isConnected: false,
       error: null,
 
