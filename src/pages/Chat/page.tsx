@@ -15,7 +15,7 @@ import { useChatStore } from "@/libraries/stores/useChatStore";
 const ChatPage = () => {
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const { chatRooms, markMessagesAsReadInRoomAsync, fetchChatRooms } = useChatStore();
-  const myUserId = Number(useUserStore((state) => state.userId));
+  const myUserId = (useUserStore((state) => state.userId));
   const { connect, disconnect, isConnected } = useChatSocket();
 
   // ✅ WebSocket 연결 후 구독 로직

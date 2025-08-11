@@ -6,8 +6,8 @@ import { getChatRooms } from '@/apis/chatRoom';
 export interface Message {
   id: number;
   content: string;
-  senderId: number;
-  receiverId: number | null; // null일 경우 상대방이 오프라인 상태
+  senderId: string;
+  receiverId: string | null; // null일 경우 상대방이 오프라인 상태
   chatRoomId: number;
   timestamp: string;
   isRead: boolean;
@@ -15,10 +15,10 @@ export interface Message {
 
 interface ChatRoom {
   id: number; // 채팅방 ID
-  user1Id: number; // 채팅방 사용자1 ID
+  user1Id: string; // 채팅방 사용자1 ID
   user1Nickname: string;
   // user1: { id: number; nickname: string };
-  user2Id: number;
+  user2Id: string;
   user2Nickname: string;
   // user2: { id: number; nickname: string };
 }
@@ -31,7 +31,7 @@ interface ChatState {
   fetchMessages: (roomId: number) => Promise<void>;
   addMessage: (roomId: number, message: Message) => void;
   markMessageAsRead: (messageId: number) => Promise<void>;
-  markMessagesAsReadInRoomAsync: (roomId: number, myUserId: number) => Promise<void>;
+  markMessagesAsReadInRoomAsync: (roomId: number, myUserId: string) => Promise<void>;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -98,7 +98,7 @@ export const useChatStore = create<ChatState>()(
         await markMessageAsRead(messageId);
         
       },
-      markMessagesAsReadInRoomAsync: async (roomId: number, myUserId: number) => {
+      markMessagesAsReadInRoomAsync: async (roomId: number, myUserId: string) => {
         const { messages } = get();
         const roomMessages = messages[roomId] || [];
       

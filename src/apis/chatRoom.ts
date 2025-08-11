@@ -2,9 +2,9 @@ import client from "./client";
 // 채팅방 정보 타입 정의
 export interface ChatRoom {
   id: number;
-  user1Id: number;
+  user1Id: string;
   user1Nickname: string;
-  user2Id: number;
+  user2Id: string;
   user2Nickname: string;
   createdAt: string;
   updatedAt: string;

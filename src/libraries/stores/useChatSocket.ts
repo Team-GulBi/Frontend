@@ -8,7 +8,7 @@ interface ChatSocketState {
   error: string | null;
   connect: (token: string) => void;
   disconnect: () => void;
-  sendMessage: (roomId: number, content: string, senderId: number) => void;
+  sendMessage: (roomId: number, content: string, senderId: string) => void;
 }
 
 // ✅ WebSocket URL 자동 선택 (ws:// 또는 wss://)

@@ -17,9 +17,14 @@ const login = async (data: LoginRequest): Promise<LoginResponse> => {
   const token = response.data.token;
   const id = response.data.id;
 
+  
   // 토큰을 로컬 스토리지에 저장
   localStorage.setItem('token', token);
   localStorage.setItem('userId', id.toString());
+  
+  const setUserId = useUserStore.getState().setUserId;
+  setUserId(id);
+
   window.location.replace("/");
   return response.data;
 };

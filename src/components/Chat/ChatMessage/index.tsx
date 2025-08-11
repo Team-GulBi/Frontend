@@ -15,7 +15,7 @@ interface ChatMessageProps {
 export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: ChatMessageProps) => {
   const { messages, fetchMessages } = useChatStore();
   const { sendMessage } = useChatSocket();
-  const myUserId = Number(useUserStore((state) => state.userId));
+  const myUserId = (useUserStore((state) => state.userId));
   const [messageInput, setMessageInput] = useState("");
 
   const isConnected = useChatSocket((state) => state.isConnected);
@@ -28,17 +28,17 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
   };
   const [prevChatLog, setPrevChatLog] = useState("");
 
-  // useEffect(() => {
-  //   if (chatRoomId) {
-  //     fetchMessages(chatRoomId)
-  //       .then(() => {
-  //         console.log("✅ 채팅 내역 불러오기 완료:", chatRoomId);
-  //         // const loadedMessages = useChatStore.getState().messages[chatRoomId];
-  //         // console.log("📦 불러온 메시지:", loadedMessages);  // ✅ 여기 확인!
-  //       })
-  //       .catch((err) => console.error("❌ 채팅 내역 불러오기 실패:", err));
-  //   }
-  // }, [chatRoomId]);
+  useEffect(() => {
+    if (chatRoomId) {
+      fetchMessages(chatRoomId)
+        .then(() => {
+          console.log("✅ 채팅 내역 불러오기 완료:", chatRoomId);
+          // const loadedMessages = useChatStore.getState().messages[chatRoomId];
+          // console.log("📦 불러온 메시지:", loadedMessages);  // ✅ 여기 확인!
+        })
+        .catch((err) => console.error("❌ 채팅 내역 불러오기 실패:", err));
+    }
+  }, [chatRoomId]);
   
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -102,8 +102,7 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
 
       <div className="flex-grow overflow-y-auto">
         {chatMessages.map((message, index) => {
-          const isMyMessage = myUserId === message.senderId;
-
+          const isMyMessage = Number(myUserId) === Number(message.senderId);
           const showDate =
             index === 0 ||
             chatMessages[index - 1]?.timestamp?.slice(0, 10) !== message.timestamp?.slice(0, 10);
