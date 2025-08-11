@@ -38,7 +38,6 @@ const routes: RouteObject[] = [
     path: RoutePath.Signup,
     children: [
       { index: true, element: <SignupPage /> },
-      { path: RoutePath.Onboarding, element: <OnboardingPage /> },
     ],
   },
   {
