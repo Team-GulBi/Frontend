@@ -28,7 +28,7 @@ const ChatRoomList = ({ onSelectRoom }: { onSelectRoom: (roomId: number) => void
       ) : (
         chatRooms.map((room, index) => {
           if (!myUserId) return null;
-          const isUser1 = room.user1Id === myUserId;
+          const isUser1 = String(room.user1Id) === String(myUserId);
           const otherUserNickname = isUser1 ? room.user2Nickname : room.user1Nickname;
 
           console.log(`🟢 채팅방 ${index} - 이름: ${otherUserNickname}, ID: ${room.id}`);

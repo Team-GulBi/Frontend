@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import { useChatStore } from "@/libraries/stores/useChatStore";
+import { useChatStore, Message } from "@/libraries/stores/useChatStore";
 import { useChatSocket } from "@/libraries/stores/useChatSocket";
 import { useUserStore } from "@/libraries/stores";
 import { convertToKST } from "../date";
-import type { Message } from "@/libraries/stores/useChatStore";
 
 interface ChatMessageProps {
   chatRoomId: number;
@@ -12,82 +11,88 @@ interface ChatMessageProps {
   imgSrc: string;
 }
 
+function createClientMessageId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    // @ts-ignore
+    return crypto.randomUUID();
+  }
+  return `cmsg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: ChatMessageProps) => {
-  const { messages, fetchMessages } = useChatStore();
+  const { messages, fetchMessages, upsertMessage } = useChatStore();
   const { sendMessage } = useChatSocket();
-  const myUserId = (useUserStore((state) => state.userId));
+  const myUserId = useUserStore((s) => s.userId); // string
+  const isConnected = useChatSocket((s) => s.isConnected);
+
   const [messageInput, setMessageInput] = useState("");
 
-  const isConnected = useChatSocket((state) => state.isConnected);
-
-  // ✅ 스크롤 하단 이동용 ref
+  // scroll to bottom
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
-  const scrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-  const [prevChatLog, setPrevChatLog] = useState("");
-
+  // 최초 로딩 시 방 메시지 가져오기
   useEffect(() => {
     if (chatRoomId) {
       fetchMessages(chatRoomId)
         .then(() => {
           console.log("✅ 채팅 내역 불러오기 완료:", chatRoomId);
-          // const loadedMessages = useChatStore.getState().messages[chatRoomId];
-          // console.log("📦 불러온 메시지:", loadedMessages);  // ✅ 여기 확인!
         })
         .catch((err) => console.error("❌ 채팅 내역 불러오기 실패:", err));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatRoomId]);
-  
-  
+
+  // 메시지 리스트 선택
+  const chatMessages: Message[] = Array.isArray(messages[chatRoomId])
+    ? messages[chatRoomId].filter((m) => m && typeof m === "object" && m.content)
+    : [];
+
+  // 메시지 변경 시 하단 스크롤
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages.length]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") handleSend();
   };
 
   const handleSend = () => {
     if (!messageInput.trim()) return;
-    if (myUserId !== null && isConnected) {
-      const newMessage = {
-        chatRoomId,
-        content: messageInput,
-        senderId: myUserId,
-        timestamp: new Date().toISOString(),
-        id: Date.now(),
-        isRead: false,
-      };
+    if (!myUserId) return;
 
-      sendMessage(chatRoomId, messageInput, myUserId);
-      // useChatStore.getState().addMessage(chatRoomId, newMessage);
-      console.log("📤 메시지 전송 및 상태 업데이트:", newMessage);
+    const clientMessageId = createClientMessageId();
+    const nowUtcIso = new Date().toISOString();
+
+    // 1) 낙관적 업서트(즉시 내 말풍선)
+    const optimistic = {
+      id: "", // 서버 id 미정
+      content: messageInput,
+      senderId: String(myUserId),
+      receiverId: null,
+      chatRoomId,
+      timestamp: nowUtcIso, // 스토어는 UTC만
+      isRead: false,
+      clientMessageId,
+      status: "pending" as const,
+    };
+    upsertMessage(chatRoomId, optimistic);
+
+    // 2) 실제 전송 (서버가 clientMessageId를 무시해도, 수신 보정 로직이 pending과 매칭)
+    if (isConnected) {
+      sendMessage(chatRoomId, messageInput, String(myUserId), clientMessageId);
     } else {
-      console.log("⚠️ WebSocket 연결이 되어 있지 않습니다.");
+      console.warn("⚠️ WebSocket 연결이 없음. 메시지 전송 대기/실패 처리 필요");
+      // 필요 시 실패 처리로 전환 가능: upsertMessage(chatRoomId, { ...optimistic, status: "failed" })
     }
+
     setMessageInput("");
   };
 
-  // ✅ 필터링된 메시지 목록
-  const chatMessages = Array.isArray(messages[chatRoomId])
-    ? messages[chatRoomId].filter((msg) => typeof msg === "object" && msg.content)
-    : [];
-
-  // ✅ 메시지 변경 시 스크롤 하단 이동
-  useEffect(() => {
-  const serialized = JSON.stringify(chatMessages);
-  if (serialized !== prevChatLog) {
-    console.log("👤 내 userId:", myUserId, " (typeof:", typeof myUserId, ")");
-    console.log("🔍 받은 메시지 목록:", chatMessages);
-    setPrevChatLog(serialized);
-    scrollToBottom();
-  }
-}, [chatMessages, prevChatLog]);
-
   const isMyMessageRead = (message: Message): boolean => {
-    return (
-      message.senderId === myUserId && // 내가 보낸 메시지이고
-      (message.receiverId !== null || message.isRead === true) // 상대가 받았다고 판단
-    );
+    return message.senderId === String(myUserId) && (message.receiverId !== null || message.isRead);
   };
+
   return (
     <div className="flex h-[650px] w-[800px] flex-col rounded-[16px] bg-white shadow-lg">
       <div className="flex w-full items-center justify-between rounded-t-[16px] bg-white py-4 px-6">
@@ -102,29 +107,37 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
 
       <div className="flex-grow overflow-y-auto">
         {chatMessages.map((message, index) => {
-          const isMyMessage = Number(myUserId) === Number(message.senderId);
-          const showDate =
-            index === 0 ||
-            chatMessages[index - 1]?.timestamp?.slice(0, 10) !== message.timestamp?.slice(0, 10);
+          const isMyMessage = String(myUserId) === message.senderId;
+          const prevKstDate = index > 0 ? convertToKST(chatMessages[index - 1]?.timestamp, "date") : null;
+          const currKstDate = convertToKST(message.timestamp, "date");
+          const showDate = index === 0 || prevKstDate !== currKstDate;
 
           return (
-            <div key={message.id || index}>
+            <div key={message.clientMessageId || message.id || index}>
               {showDate && (
                 <div className="flex w-full justify-center">
                   <span className="mb-6 mt-7 text-xsmall14 font-medium text-neutral-50">
-                  {convertToKST(message.timestamp, "date") || "날짜 없음"}
+                    {convertToKST(message.timestamp, "date") || "날짜 없음"}
                   </span>
                 </div>
               )}
 
-              <div className={`mb-5 flex flex-col ${isMyMessage ? "mr-[20px] items-end" : "ml-[20px] items-start"}`}>
+              <div
+                className={`mb-5 flex flex-col ${
+                  isMyMessage ? "mr-[20px] items-end" : "ml-[20px] items-start"
+                }`}
+              >
                 <div className="flex gap-2">
                   {isMyMessage && (
                     <span className="font-regular self-end text-xxsmall10 text-neutral-50">
                       {convertToKST(message.timestamp)}
                     </span>
                   )}
-                  <div className={`rounded-[8px] px-[15px] py-[7px] ${isMyMessage ? "bg-primary-100" : "bg-neutral-80"}`}>
+                  <div
+                    className={`rounded-[8px] px-[15px] py-[7px] ${
+                      isMyMessage ? "bg-primary-100" : "bg-neutral-80"
+                    }`}
+                  >
                     <p className="font-regular text-xxsmall12 text-neutral-0">{message.content}</p>
                   </div>
                   {!isMyMessage && (
@@ -133,17 +146,21 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
                     </span>
                   )}
                 </div>
-                {/* ✅ 읽음 여부 표시 */}
+
+                {/* 읽음/상태 표시 */}
                 {isMyMessage && (
                   <span className="mt-1 text-[10px] text-neutral-40">
-                    {isMyMessageRead(message) ? "읽음" : "전송됨"}
+                    {message.status === "pending"
+                      ? "전송 중…"
+                      : isMyMessageRead(message)
+                      ? "읽음"
+                      : "전송됨"}
                   </span>
                 )}
               </div>
             </div>
           );
         })}
-        {/* ✅ 스크롤 이동을 위한 더미 div */}
         <div ref={messageEndRef} />
       </div>
 
@@ -156,7 +173,10 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
             placeholder="채팅을 입력해주세요"
             className="font-regular mr-5 flex-grow text-xsmall14 text-neutral-30 outline-none"
           />
-          <button onClick={handleSend} className="font-regular rounded-[8px] bg-primary-100 px-5 py-1 text-xsmall14 text-white">
+          <button
+            onClick={handleSend}
+            className="font-regular rounded-[8px] bg-primary-100 px-5 py-1 text-xsmall14 text-white"
+          >
             전송
           </button>
         </div>
