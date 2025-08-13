@@ -41,8 +41,9 @@ export default function CompletedContractPage() {
 
   const viewData =
     contract && {
-      lender: "대여인", // 이름 필드가 응답에 없으므로 우선 플레이스홀더(또는 상위에서 주입)
-      borrower: "차용인",
+      // ✅ API의 이름 필드 사용
+      lenderName: contract.lenderName,
+      borrowerName: contract.borrowerName,
       itemName: contract.itemName,
       specifications: contract.specifications,
       quantity: contract.quantity,

@@ -33,6 +33,9 @@ export type ContractDTO = {
   url: string;
   lenderSignature: string;     // s3 url
   borrowerSignature: string;   // s3 url
+  lenderName: string;
+  borrowerName: string;
+
 };
 
 /** (1) applicationId로 계약서 전체 조회 */
