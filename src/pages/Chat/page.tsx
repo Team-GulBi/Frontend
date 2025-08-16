@@ -10,7 +10,7 @@ import { convertToKST } from "@/components/Chat/date";
 
 const ChatPage = () => {
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
-  const { chatRooms, markMessagesAsReadInRoomAsync, fetchChatRooms } = useChatStore();
+  const { chatRooms, fetchChatRooms } = useChatStore();
   const myUserId = useUserStore((state) => state.userId);
   const { connect, disconnect, isConnected } = useChatSocket();
 
@@ -76,7 +76,9 @@ const ChatPage = () => {
                     chats={unreadCount}
                     onClick={async () => {
                       setSelectedRoomId(room.id);
-                      await markMessagesAsReadInRoomAsync(room.id, myUserId);
+                      useChatSocket.getState().switchRoom(room.id); // ✅ 이 방만 구독
+                      await useChatStore.getState().fetchMessages(room.id);                 // ✅ 최신 상태로 맞춤
+                      // await markMessagesAsReadInRoomAsync(room.id, myUserId); // ❌ 이제 서버가 처리
                     }}
                   />
                 );

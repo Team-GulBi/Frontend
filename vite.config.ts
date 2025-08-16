@@ -16,13 +16,13 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://54.180.162.59:8080",
+        target: "http://13.124.22.46:8080",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, "/api"), // ✅ 핵심!
       },
       "/ws-stomp": {
-        target: "ws://54.180.162.59:8080", // 백엔드 주소
+        target: "ws://13.124.22.46:8080", // 백엔드 주소
         ws: true, // WebSocket 프록시 활성화
         changeOrigin: true, // 도메인 변경 허용
         secure: false, // HTTPS가 아니라면 false
