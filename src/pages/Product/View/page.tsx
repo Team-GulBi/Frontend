@@ -1,6 +1,6 @@
 import { ReactComponent as Star } from '@/assets/svgs/star.svg';
 import { useNavigate, useParams } from 'react-router-dom';
-import DefaultProfile from "@/assets/images/DefaultProfile.png";
+import DefaultProfile from '@/assets/images/DefaultProfile.png';
 import { ReviewCard } from '../../../components/Product/ReviewCard';
 import {
   Carousel,
@@ -19,6 +19,7 @@ import useSeperateTags from '@/hooks/utils/useSeperateTags';
 import { useDeleteProduct } from '@/hooks/mutations';
 import { useState } from 'react';
 import { DeleteModal } from '@/components/common/DeleteModal';
+import { ReserveModal } from '@/components/Product/ReserveModal';
 
 const ProductViewPage = () => {
   const navigate = useNavigate();
@@ -26,12 +27,13 @@ const ProductViewPage = () => {
   const { data, isLoading } = useGetProductDetail(Number(id));
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  
-  const tagList = useSeperateTags(data?.data?.tag);
+  const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
+
+  const tagList = useSeperateTags(data?.data?.tag || '');
 
   const handleNavigatePage = () => {
-    navigate("/");
-  }
+    navigate('/');
+  };
 
   const handleEdit = () => {
     navigate(`/product/edit/${id}`);
@@ -41,15 +43,18 @@ const ProductViewPage = () => {
     setIsDeleteModalOpen(true);
   };
 
+  const handleReserve = () => {
+    setIsReserveModalOpen(true);
+  };
+
   const confirmDelete = () => {
     deleteProduct(Number(id), {
       onSuccess: () => {
         setIsDeleteModalOpen(false);
-        navigate("/");
+        navigate('/');
       },
     });
   };
-
 
   if (isLoading || isPending) return <div>로딩 중...</div>;
 
@@ -64,7 +69,10 @@ const ProductViewPage = () => {
           >
             수정하기
           </ProductRelatedButton>
-          <ProductRelatedButton onClick={handleDelete} className="text-[#D82D30]">
+          <ProductRelatedButton
+            onClick={handleDelete}
+            className="text-[#D82D30]"
+          >
             삭제하기
           </ProductRelatedButton>
         </div>
@@ -81,20 +89,23 @@ const ProductViewPage = () => {
         <div className="mb-12 flex flex-col items-start border-b px-[23px] pb-[15px]">
           <div className="mb-2 flex w-full flex-col">
             <div className="mb-2 flex items-end gap-1">
-            <Star 
-                width="18" height="18" viewBox="0 0 13 13"
-                className="self-center text-[#FCAF15]" />
+              <Star
+                width="18"
+                height="18"
+                viewBox="0 0 13 13"
+                className="self-center text-[#FCAF15]"
+              />
               <span className="pt-1 text-medium20 font-medium text-neutral-20">
-                {data?.data?.rating}
+                {data?.data?.reviews?.reviews?.[0]?.averageRating || 0.0}
               </span>
             </div>
             <div className="flex items-center space-x-2 text-small16 text-neutral-40">
               <ReadyToRentChip />
-              <span>{data?.data?.bcategory.name}</span>
+              <span>{data?.data?.productCategories?.bigName}</span>
               <RightArray />
-              <span>{data?.data?.mcategory.name}</span>
+              <span>{data?.data?.productCategories?.midName}</span>
               <RightArray />
-              <span>{data?.data?.scategory.name}</span>
+              <span>{data?.data?.productCategories?.smallName}</span>
             </div>
           </div>
           <div className="flex w-full justify-between">
@@ -103,19 +114,19 @@ const ProductViewPage = () => {
                 {data?.data?.title}
               </span>
               <div className="mt-2 flex gap-2">
-              {tagList.map((tag, index) => (
-                <span
-                  key={index}
-                  className="rounded-md bg-neutral-100 px-2 py-1 text-xsmall14 text-neutral-0"
-                >
-                  {tag}
-                </span>
-              ))}
+                {tagList.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="rounded-md bg-neutral-100 px-2 py-1 text-xsmall14 text-neutral-0"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <img
-                src={data?.data?.userPhoto.imageUrl || DefaultProfile}
+                src={DefaultProfile}
                 alt="profile"
                 className="h-11 w-11 rounded-full border"
               />
@@ -127,38 +138,44 @@ const ProductViewPage = () => {
         </div>
 
         <div className="mx-[38px] mb-[46px] flex space-x-[120px]">
-        <div className="flex w-full items-center">
+          <div className="flex w-full items-center">
             <Carousel>
               <CarouselContent>
-              {data?.data?.images?.productImages?.length ? (
-                <>
-                  {data?.data?.images?.productImages?.find(image => image.main) ? (
-                    <CarouselItem key="main">
-                      <img
-                        src={decodeURIComponent(data.data.images.productImages.find(image => image.main)!.url)}
-                        alt="main-product"
-                        className="w-full object-cover rounded-md"
-                      />
-                    </CarouselItem>
-                  ) : (
-                    <div>대표 이미지 없음</div>
-                  )}
-
-                  {data?.data?.images?.productImages
-                    ?.filter(image => !image.main)
-                    .map((image, index) => (
-                      <CarouselItem key={`product-${index + 1}`}>
+                {data?.data?.productImages?.productImages?.length ? (
+                  <>
+                    {data?.data?.productImages?.productImages?.find(
+                      (image: any) => image.main,
+                    ) ? (
+                      <CarouselItem key="main">
                         <img
-                          src={decodeURIComponent(image.url)}
-                          alt={`product-${index + 1}`}
-                          className="w-full object-cover rounded-md"
+                          src={decodeURIComponent(
+                            data.data.productImages.productImages.find(
+                              (image: any) => image.main,
+                            )!.url,
+                          )}
+                          alt="main-product"
+                          className="w-full rounded-md object-cover"
                         />
                       </CarouselItem>
-                    ))}
-                </>
-              ) : (
-                <div>이미지가 없습니다</div>
-              )}
+                    ) : (
+                      <div>대표 이미지 없음</div>
+                    )}
+
+                    {data?.data?.productImages?.productImages
+                      ?.filter((image: any) => !image.main)
+                      .map((image: any, index: number) => (
+                        <CarouselItem key={`product-${index + 1}`}>
+                          <img
+                            src={decodeURIComponent(image.url)}
+                            alt={`product-${index + 1}`}
+                            className="w-full rounded-md object-cover"
+                          />
+                        </CarouselItem>
+                      ))}
+                  </>
+                ) : (
+                  <div>이미지가 없습니다</div>
+                )}
               </CarouselContent>
               <CarouselPrevious />
               <CarouselNext />
@@ -223,7 +240,7 @@ const ProductViewPage = () => {
 
         <div className="mx-[30px] mb-[25px] flex justify-end space-x-6">
           <NavigateButton onClick={handleNavigatePage}>채팅하기</NavigateButton>
-          <NavigateButton onClick={handleNavigatePage}>예약하기</NavigateButton>
+          <NavigateButton onClick={handleReserve}>예약하기</NavigateButton>
           <NavigateButton onClick={handleNavigatePage}>
             계약서 작성하기
           </NavigateButton>
@@ -235,18 +252,25 @@ const ProductViewPage = () => {
           </span>
         </div>
         <div className="flex flex-col space-y-9">
-          {data?.data?.reviews.map((review) => (
+          {data?.data?.reviews?.reviews?.map((review: any) => (
             <ReviewCard
               key={review.id}
               reviewId={review.id}
               nickname="wowow"
-              rating={review.rating}
+              rating={review.rating || 0}
               content={review.content}
               createdAt="1999.09.12"
             />
           ))}
         </div>
       </div>
+      {isReserveModalOpen && (
+        <ReserveModal
+          mode="borrower"
+          productId={Number(id)}
+          onClose={() => setIsReserveModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
