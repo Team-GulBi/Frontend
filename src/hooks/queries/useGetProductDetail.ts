@@ -10,57 +10,49 @@ export type ProductDetailResponse = {
 };
 
 type ProductDetailResult = {
-  tag: string;
+  tag: string | null;
   title: string;
   productName: string;
   price: string;
   view?: string;
-  rating?: string;
   sido: string;
   sigungu: string;
   bname: string;
   description: string;
-  bcategory: CategoryResult;
-  mcategory: CategoryResult;
-  scategory: CategoryResult;
   created_at: string;
-  images: ProductImagesResult;
-  reviews: ReviewResult[];
-  userPhoto: imageUrl;
+  productCategories: {
+    bigCategoryId: number;
+    bigName: string;
+    midCategoryId: number;
+    midName: string;
+    smallCategoryId: number;
+    smallName: string;
+  };
+  productImages: {
+    productImages: {
+      id: number;
+      url: string;
+      main: boolean;
+    }[];
+  };
+  reviews: {
+    reviews: ReviewResult[];
+  };
   userNickname: string;
 };
 
-type ProductImagesResult = {
-  productImages: [
-    {
-      id: number;
-      productid: number;
-      url: string;
-      main: boolean;
-    }
-  ]
-}
-
 type ReviewResult = {
-  rating: number;
-  averageRating: number;
-  id: number;
-  content: string;
-}
-
-type imageUrl = {
-  imageUrl: string;
-}
-
-type CategoryResult = {
-  id: number;
-  name: string;
-  parent: CategoryResult | null;
+  rating?: number;
+  averageRating?: number;
+  id?: number;
+  content?: string;
 };
 
-const getProductDetail = async (productId: number) => {  
+const getProductDetail = async (productId: number) => {
   try {
-    const response = await client.get<ProductDetailResponse>(`/products/${productId}`);
+    const response = await client.get<ProductDetailResponse>(
+      `/products/${productId}`,
+    );
     return response.data;
   } catch (error) {
     console.error(error);
@@ -68,10 +60,13 @@ const getProductDetail = async (productId: number) => {
   }
 };
 
-const useGetProductDetail = (productId?: number): UseQueryResult<ProductDetailResponse | null, AxiosError> => {
+const useGetProductDetail = (
+  productId?: number,
+): UseQueryResult<ProductDetailResponse | null, AxiosError> => {
   return useQuery<ProductDetailResponse | null, AxiosError>({
     queryKey: ['product', productId],
-    queryFn: () => (productId ? getProductDetail(productId) : Promise.resolve(null)),
+    queryFn: () =>
+      productId ? getProductDetail(productId) : Promise.resolve(null),
     enabled: !!productId,
   });
 };
