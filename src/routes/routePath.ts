@@ -8,9 +8,7 @@ const RoutePath = {
     Chat: "/chat",
 
     Login: "/login",
-
     Signup: "/signup",
-    Onboarding: "/signup/profile",
 
     MyPage: "/profile",
 

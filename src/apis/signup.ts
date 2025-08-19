@@ -5,14 +5,32 @@ export interface SignupRequest {
   email: string;
   password: string;
   phoneNumber: string;
+  signature: File;
 }
 
-export type SignupResponse = string;
+const signup = async (data: SignupRequest): Promise<void> => {
+  const formData = new FormData();
 
-const signup = async (data: SignupRequest): Promise<SignupResponse> => {
-  const response = await client.post<SignupResponse>('/signup', data);
-  window.location.replace("/signup/profile");
-  return response.data;
+  const request = {
+    nickname: data.nickname,
+    email: data.email,
+    password: data.password,
+    phoneNumber: data.phoneNumber,
+  };
+
+  formData.append(
+    'request',
+    new Blob([JSON.stringify(request)], { type: 'application/json' }),
+  );
+  formData.append('signature', data.signature);
+
+  await client.post('/signup', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  window.location.replace('/login');
 };
 
 export default signup;
