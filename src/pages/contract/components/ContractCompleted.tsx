@@ -2,32 +2,51 @@ import React, { useRef, forwardRef, useImperativeHandle } from "react";
 import html2canvas from "html2canvas";
 
 interface ContractProps {
-  // ✅ 이름은 API에서 내려옴
+  // ✅ API에서 내려오는 이름
   lenderName: string;
   borrowerName: string;
 
+  // ✅ 물품/조항
   itemName: string;
   specifications: string;
   quantity: number;
   condition: string;
   notes?: string;
+
+  // ✅ 기간/장소 (상세주소 제거)
+  rentalStartDate: string;  // ← 추가
   rentalEndDate: string;
   rentalPlace: string;
-  rentalDetailAddress: string;
-  returnDate: string;
   returnPlace: string;
-  returnDetailAddress: string;
+
+  // ✅ 금액/비율
   rentalFee: number;
-  paymentDate: string;
   lateInterestRate: number;
   latePenaltyRate: number;
   damageCompensationRate: number;
+
+  // ✅ 날짜 표기(문서 하단 날짜)
   createdDate: string;
 
+  // ✅ 서명(URL)
   borrowerSignatureUrl?: string;
   lenderSignatureUrl?: string;
   showLenderSignature?: boolean;
+
+  // (선택) 승인 상태 뱃지용
+  lenderApproval?: boolean;
+  borrowerApproval?: boolean;
 }
+
+const fmt = (iso?: string) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d
+    .toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
+    .replace(/\./g, "-")
+    .replace(/ /g, "")
+    .replace(/-$/, "");
+};
 
 export const ContractCompleted = ({
   lenderName,
@@ -37,14 +56,11 @@ export const ContractCompleted = ({
   quantity,
   condition,
   notes,
+  rentalStartDate,
   rentalEndDate,
   rentalPlace,
-  rentalDetailAddress,
-  returnDate,
   returnPlace,
-  returnDetailAddress,
   rentalFee,
-  paymentDate,
   lateInterestRate,
   latePenaltyRate,
   damageCompensationRate,
@@ -52,23 +68,40 @@ export const ContractCompleted = ({
   borrowerSignatureUrl,
   lenderSignatureUrl,
   showLenderSignature = false,
+  lenderApproval,
+  borrowerApproval,
 }: ContractProps) => {
   return (
     <div className="flex flex-col w-full h-full px-8">
       <div className="flex w-full h-[85%] justify-center items-center overflow-hidden" />
-      <span className="text-3xl font-bold text-center mb-8">차용 계약서(차용인 ver)</span>
+      <h1 className="text-3xl font-bold text-center mb-8">차용 계약서(대여인 ver)</h1>
 
+      {/* 간단한 상태 뱃지 */}
+      <div className="mb-4 flex gap-2 justify-center">
+        {typeof lenderApproval === "boolean" && (
+          <span className={`px-3 py-1 rounded-full text-sm ${lenderApproval ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+            대여인 승인 {lenderApproval ? "완료" : "대기"}
+          </span>
+        )}
+        {typeof borrowerApproval === "boolean" && (
+          <span className={`px-3 py-1 rounded-full text-sm ${borrowerApproval ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+            차용인 승인 {borrowerApproval ? "완료" : "대기"}
+          </span>
+        )}
+      </div>
+
+      {/* 당사자 */}
       <p className="font-extrabold">
         <strong>대여인:</strong>{" "}
         <span className="underline underline-offset-2">{lenderName}</span>
       </p>
-
       <p className="mt-1">
         <strong>차용인:</strong>{" "}
         <span className="underline underline-offset-2">{borrowerName}</span>
       </p>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-4">물품 정보</h2>
+      {/* 물품 정보 */}
+      <h2 className="text-2xl font-semibold mt-6 mb-4">제 1조 (물품 및 상태)</h2>
       <table className="table-auto border-collapse border border-gray-400 w-full text-left mb-6">
         <thead>
           <tr>
@@ -90,46 +123,62 @@ export const ContractCompleted = ({
         </tbody>
       </table>
 
-      <p className="mt-4">차용인은 위 물품을 틀림없이 차용(임대)하였으며, 아래와 같이 이행할 것을 확약한다.</p>
-
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 1조(차용기간 및 장소)</h2>
+      {/* 기간/장소 (상세주소 제거) */}
+      <h2 className="text-2xl font-semibold mt-6 mb-4">제 2조 (차용 기간 및 장소)</h2>
       <p>
-        1. 본 계약에 따라 대여인은 차용인에게{" "}
-        <strong><span className="underline underline-offset-2">{rentalEndDate}</span></strong>까지 해당 물품을 임대해야 한다. 해당 물품의 대여장소는{" "}
-        <strong><span className="underline underline-offset-2">{rentalPlace}</span></strong>로 정한다.
+        ① 차용 기간은{" "}
+        <strong><span className="underline underline-offset-2">{fmt(rentalStartDate)}</span></strong>
+        {" "}부터{" "}
+        <strong><span className="underline underline-offset-2">{fmt(rentalEndDate)}</span></strong>
+        {" "}까지로 한다.
       </p>
-      <p>- 상세주소: <strong><span className="underline underline-offset-2">{rentalDetailAddress}</span></strong></p>
-
-      <p className="mt-2">
-        2. 본 계약에 따라 차용인은 임대기간 종료 후{" "}
-        <strong><span className="underline underline-offset-2">{returnDate}</span></strong>까지 해당 물품을 대여인에게 반납해야 한다.
-        반납장소는 <strong><span className="underline underline-offset-2">{returnPlace}</span></strong>로 정한다.
+      <p className="mt-1">
+        ② 대여 장소는{" "}
+        <strong><span className="underline underline-offset-2">{rentalPlace}</span></strong>
+        {" "}로 하고, 반납 장소는{" "}
+        <strong><span className="underline underline-offset-2">{returnPlace}</span></strong>
+        {" "}로 한다.
       </p>
-      <p>- 상세주소: <strong><span className="underline underline-offset-2">{returnDetailAddress}</span></strong></p>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 2조(임대료의 납부)</h2>
+      {/* 비용/지연 */}
+      <h2 className="text-2xl font-semibold mt-6 mb-4">제 3조 (임대료 및 지연 손해금)</h2>
       <p>
-        임대료는 <strong><span className="underline underline-offset-2">{rentalFee ? rentalFee.toLocaleString() : "0"}원</span></strong>이며,
-        <strong><span className="underline underline-offset-2">{paymentDate}</span></strong>에 일시지급한다.
+        ① 임대료는{" "}
+        <strong><span className="underline underline-offset-2">{rentalFee ? rentalFee.toLocaleString() : "0"}원</span></strong>
+        {" "}으로 한다.
+      </p>
+      <p className="mt-1">
+        ② 차용인이 임대료 지급을 지체한 경우, 지연 이자율{" "}
+        <strong><span className="underline underline-offset-2">{lateInterestRate}%</span></strong>
+        {" "}를 적용한다.
+      </p>
+      <p className="mt-1">
+        ③ 차용인이 반납을 지체한 경우, 지연 손해금{" "}
+        <strong><span className="underline underline-offset-2">{latePenaltyRate}%</span></strong>
+        {" "}를 적용한다.
       </p>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 3조(지연손해금)</h2>
-      <p>1. 임대료 지연 시 일 <strong><span className="underline underline-offset-2">{lateInterestRate}%</span></strong>를 청구할 수 있다.</p>
-      <p className="mt-2">2. 반납 지연 시 물품가액의 <strong><span className="underline underline-offset-2">{latePenaltyRate}%</span></strong>를 청구할 수 있다.</p>
+      {/* 손상/배상 */}
+      <h2 className="text-2xl font-semibold mt-6 mb-4">제 4조 (위험부담 및 면책)</h2>
+      <p>
+        ① 차용인의 귀책으로 물품에 파손·훼손·멸실이 발생한 경우, 차용인은 신품가의{" "}
+        <strong><span className="underline underline-offset-2">{damageCompensationRate}%</span></strong>
+        {" "}에 해당하는 금액을 배상한다.
+      </p>
+      <p className="mt-1">
+        ② 천재지변, 사변, 국가 비상사태 등 불가항력 사유로 발생한 손해에 대해서는 배상책임을 면한다.
+      </p>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 4조(위험부담 및 면책조항)</h2>
-      <p>1. 차용인의 귀책으로 파손/훼손/멸실 발생 시 신품가의 <strong><span className="underline underline-offset-2">{damageCompensationRate}%</span></strong> 배상.</p>
-      <p className="mt-2">2. 불가항력 사유인 경우 면책.</p>
-
+      {/* 날짜 */}
       <p className="mt-6 font-bold text-center">
         <span className="underline underline-offset-2">{createdDate}</span>
       </p>
 
+      {/* 서명 */}
       <div className="mt-8 text-center">
         <p className="mb-4">
           <strong>대여인:</strong>{" "}
           <span className="underline underline-offset-2">{lenderName}</span> (서명)
-          {/* 동의 체크 시 노출 */}
           {showLenderSignature && lenderSignatureUrl && (
             <img
               src={lenderSignatureUrl}
@@ -144,7 +193,6 @@ export const ContractCompleted = ({
         <p className="mb-8">
           <strong>차용인:</strong>{" "}
           <span className="underline underline-offset-2">{borrowerName}</span> (서명)
-          {/* 항상 노출 */}
           {borrowerSignatureUrl && (
             <img
               src={borrowerSignatureUrl}

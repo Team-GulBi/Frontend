@@ -9,7 +9,7 @@ export type ApiResponse<T> = {
   data: T;
 };
 
-/** 계약서 단건 (applicationId로 조회되는 전체 스키마) */
+/** 계약서 단건 (applicationId로 조회되는 전체 스키마) — Lender 조회용 */
 export type ContractDTO = {
   id: number; // = contractId
   itemName: string;
@@ -17,6 +17,7 @@ export type ContractDTO = {
   quantity: number;
   condition: string;
   notes: string;
+  rentalStartDate?: string; // "2025-08-16T00:00:00"
   rentalEndDate: string;       // "2025-08-16T00:00:00"
   rentalPlace: string;
   rentalDetailAddress: string;
@@ -35,13 +36,12 @@ export type ContractDTO = {
   borrowerSignature: string;   // s3 url
   lenderName: string;
   borrowerName: string;
-
 };
 
-/** (1) applicationId로 계약서 전체 조회 */
+/** (1) applicationId로 계약서 전체 조회 — Lender 페이지에서 사용 */
 export async function getContractByApplicationId(applicationId: number) {
   const { data } = await client.get<ApiResponse<ContractDTO>>(
-    `/application/contracts/applications/${applicationId}`
+    `/application/contracts/${applicationId}/applications`
   );
   return data; // ApiResponse<ContractDTO>
 }
@@ -49,32 +49,28 @@ export async function getContractByApplicationId(applicationId: number) {
 /** (2) Lender 승인: 최종 캡처본 업로드 (multipart/form-data, key=finalContract) */
 export async function putLenderApproval(params: {
   contractId: number;
-  file: File | Blob; // canvas 캡처 Blob/파일
-  filename?: string; // 선택: Blob일 때 서버가 확장자 유추 못 하면 넣어주기
+  file: File | Blob;
+  filename?: string;
 }) {
   const { contractId, file, filename } = params;
   const form = new FormData();
-  // 서버 명세: 필드명은 finalContract
-  // Blob에 파일명이 없을 경우를 대비해 기본값 부여
   form.append("finalContract", file, filename ?? "final_contract.png");
 
   const { data } = await client.put<ApiResponse<null>>(
     `/application/contracts/${contractId}/lender-approval`,
     form,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
+    { headers: { "Content-Type": "multipart/form-data" } }
   );
   return data; // ApiResponse<null>
 }
 
-/** (3) (참고) 계약 생성 API — 이전 작업물 유지가 필요하면 남겨둠 */
+/** (3) (참고) 이전 생성 API — 필요시 유지 */
 export async function postContract({
   productId,
   contractData,
   applicationData,
 }: {
-  productId: number; // 임시 1
+  productId: number;
   contractData: Record<string, any>;
   applicationData: { startDate: string; endDate: string };
 }) {
@@ -94,4 +90,56 @@ export async function postContract({
     { headers: { "Content-Type": "multipart/form-data" } }
   );
   return data;
+}
+
+/* ----------------------- 🔽 Borrower 새 플로우 추가 🔽 ----------------------- */
+
+/** 템플릿 응답 — Borrower 화면 렌더용 */
+export type ProductTemplateDTO = {
+  templateId: number;
+  specification: string;
+  condition: string;
+  note: string;
+  rentalPlace: string;
+  returnPlace: string;
+  lateInterestRate: number;
+  latePenaltyRate: number;
+  damageCompensationRate: number;
+
+  // 서버에서 곧 추가 예정 → optional
+  lenderName?: string;
+  borrowerName?: string;
+  itemName?: string;
+};
+
+/** (A) 템플릿 조회 */
+export async function getProductTemplate(productId: number) {
+  const { data } = await client.get<ApiResponse<ProductTemplateDTO>>(
+    `/products/${productId}/template`
+  );
+  return data; // ApiResponse<ProductTemplateDTO>
+}
+
+/** (B) Borrower 예약(=동의) — multipart/form-data: applicationCreateRequest */
+export async function postBorrowerApplication(params: {
+  productId: number;
+  startDate: string; // ISO
+  endDate: string;   // ISO
+}) {
+  const { productId, startDate, endDate } = params;
+
+  const formData = new FormData();
+  formData.append(
+    "applicationCreateRequest",
+    new Blob([JSON.stringify({ startDate, endDate })], {
+      type: "application/json",
+    })
+  );
+
+  const { data } = await client.post<ApiResponse<null>>(
+    `/products/applications/${productId}/product`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data; // ApiResponse<null>
 }

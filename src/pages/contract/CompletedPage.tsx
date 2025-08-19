@@ -17,7 +17,7 @@ export default function CompletedContractPage() {
     const load = async () => {
       try {
         const res = await getContractByApplicationId(applicationId);
-        const dto = res.data; // ContractDTO
+        const dto = res.data;
         setContract(dto);
         setContractId(dto.id);
       } catch (e) {
@@ -28,11 +28,10 @@ export default function CompletedContractPage() {
     load();
   }, [applicationId]);
 
-  // 날짜 포맷팅
-  const formatDate = (isoString?: string | null) => {
-    if (!isoString) return "";
-    const date = new Date(isoString);
-    return date
+  const fmt = (iso?: string | null) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return d
       .toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
       .replace(/\./g, "-")
       .replace(/ /g, "")
@@ -41,30 +40,38 @@ export default function CompletedContractPage() {
 
   const viewData =
     contract && {
-      // ✅ API의 이름 필드 사용
       lenderName: contract.lenderName,
       borrowerName: contract.borrowerName,
+
       itemName: contract.itemName,
       specifications: contract.specifications,
       quantity: contract.quantity,
       condition: contract.condition,
       notes: contract.notes,
-      rentalEndDate: formatDate(contract.rentalEndDate),
+
+      // ✅ 시작/종료일 모두 전달 (상세주소 제거됨)
+      rentalStartDate: contract.rentalStartDate ?? contract.rentalEndDate, // 백엔드가 rentalStartDate 제공
+      rentalEndDate: fmt(contract.rentalEndDate),
       rentalPlace: contract.rentalPlace,
-      rentalDetailAddress: contract.rentalDetailAddress,
-      returnDate: formatDate(contract.returnDate),
       returnPlace: contract.returnPlace,
-      returnDetailAddress: contract.returnDetailAddress,
+
+      // 금액/비율
       rentalFee: contract.rentalFee,
-      paymentDate: formatDate(contract.paymentDate),
       lateInterestRate: contract.lateInterestRate,
       latePenaltyRate: contract.latePenaltyRate,
       damageCompensationRate: contract.damageCompensationRate,
-      createdDate: formatDate(new Date().toISOString()),
 
+      // 문서 하단 날짜(오늘)
+      createdDate: fmt(new Date().toISOString()),
+
+      // 서명
       borrowerSignatureUrl: contract.borrowerSignature,
       lenderSignatureUrl: contract.lenderSignature,
       showLenderSignature: isChecked,
+
+      // 승인 상태(선택)
+      lenderApproval: contract.lenderApproval,
+      borrowerApproval: contract.borrowerApproval,
     };
 
   const handleCompleteClick = async () => {
@@ -81,10 +88,7 @@ export default function CompletedContractPage() {
         return;
       }
 
-      // 서버 명세: field name = finalContract
-      const filename = "final_contract.png";
-      await putLenderApproval({ contractId, file: blob, filename });
-
+      await putLenderApproval({ contractId, file: blob, filename: "final_contract.png" });
       alert("계약이 승인되어 최종 계약서가 업로드되었습니다.");
     } catch (e: any) {
       console.error("승인/업로드 실패:", e);

@@ -1,369 +1,138 @@
-import React, { useState } from "react";
+// src/pages/contract/components/ContractInput.tsx
+import { ProductTemplateDTO } from "@/apis/contract";
 
-interface ContractProps {
-  lender: string;
-  borrower: string;
-  itemName: string;
-  specifications: string;
-  quantity: number;
-  condition: string;
-  notes?: string;
-  rentalEndDate: string;
-  rentalPlace: string;
-  rentalDetailAddress: string;
-  returnDate: string;
-  returnPlace: string;
-  returnDetailAddress: string;
-  rentalFee: number;
-  paymentDate: string;
-  lateInterestRate: number;
-  latePenaltyRate: number;
-  damageCompensationRate: number;
-  createdDate: string;
-  url: string;
-}
+type Props = {
+  template: ProductTemplateDTO | null; // GET /products/{productId}/template
+  startDate: string; // ISO (분·초 00:00)
+  endDate: string;   // ISO (분·초 00:00)
+};
 
-interface ContractInputProps extends ContractProps {
-  onInputChange: (data: ContractProps) => void; // 부모로 값을 전달할 함수 추가
-}
+const fmt = (iso?: string) => {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  return d
+    .toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
+    .replace(/\./g, "-")
+    .replace(/ /g, "")
+    .replace(/-$/, "");
+};
 
-export const ContractInput = ({
-  lender = "",
-  borrower = "",
-  itemName = "",
-  specifications = "",
-  quantity = 0,
-  condition = "",
-  notes = "",
-  rentalEndDate = "",
-  rentalPlace = "",
-  rentalDetailAddress = "",
-  returnDate = "",
-  returnPlace = "",
-  returnDetailAddress = "",
-  rentalFee = 0,
-  paymentDate = "",
-  lateInterestRate = 0,
-  latePenaltyRate = 0,
-  damageCompensationRate = 0,
-  createdDate = "",
-  url = "",
-  onInputChange, // 부모로 전달받은 함수
-}: ContractInputProps) => {
-  const [formValues, setFormValues] = useState<ContractProps>({
-    lender,
-    borrower,
-    itemName,
-    specifications,
-    quantity,
-    condition,
-    notes: notes || "",
-    rentalEndDate,
-    rentalPlace,
-    rentalDetailAddress,
-    returnDate,
-    returnPlace,
-    returnDetailAddress,
-    rentalFee,
-    paymentDate,
-    lateInterestRate,
-    latePenaltyRate,
-    damageCompensationRate,
-    createdDate,
-    url,
-  });
+export function ContractInput({ template, startDate, endDate }: Props) {
+  if (!template) {
+    return (
+      <div className="flex w-full min-h-[84%] items-center justify-center">
+        템플릿을 불러오는 중...
+      </div>
+    );
+  }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => {
-      const updatedValues = { ...prevValues, [name]: value };
-      onInputChange(updatedValues); // 부모 컴포넌트에 값 전달
-      return updatedValues;
-    });
-  };
+  const lenderName = template.lenderName ?? "대여인(확인중)";
+  const borrowerName = template.borrowerName ?? "차용인(확인중)";
+  const itemName = template.itemName ?? "물품명(확인중)";
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <h1 className="text-3xl font-bold text-center mb-8">차용 계약서(대여인ver)</h1>
+    <div className="flex flex-col w-full h-full px-8">
+      <h1 className="text-3xl font-bold text-center mb-8">차용 계약서(차용인 ver)</h1>
 
-      <p>
-        <strong>대여인:</strong>{" "}
-        <input
-          type="text"
-          name="lender"
-          value={formValues.lender}
-          onChange={handleInputChange}
-          className="bg-transparent focus:outline-black outline-dashed outline-[1px]"
-          style={{
-            width: `${formValues.lender.length + 3}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />
-      </p>
-      <p>
-      <strong>차용인:</strong> <span className="underline underline-offset-2">{borrower}</span>
-      </p>
+      {/* 당사자 표시 */}
+      <div className="space-y-1">
+        <p className="font-extrabold">
+          <strong>대여인:</strong>{" "}
+          <span className="underline underline-offset-2">{lenderName}</span>
+        </p>
+        <p>
+          <strong>차용인:</strong>{" "}
+          <span className="underline underline-offset-2">{borrowerName}</span>
+        </p>
+      </div>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-4">물품 정보</h2>
-      <table className="table-auto border-collapse border border-gray-400 w-full text-left mb-6">
+      {/* 물품 정보 */}
+      <h2 className="text-2xl font-semibold mt-6 mb-4">제 1조 (물품 및 상태)</h2>
+      <table className="table-auto border-collapse border border-gray-400 w-full text-left mb-4">
         <thead>
           <tr>
             <th className="border border-gray-400 px-4 py-2">물품명</th>
             <th className="border border-gray-400 px-4 py-2">형식 및 규격</th>
-            <th className="border border-gray-400 px-4 py-2">수량</th>
             <th className="border border-gray-400 px-4 py-2">상태</th>
             <th className="border border-gray-400 px-4 py-2">비고</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="border border-gray-400 px-4 py-2">
-              <input
-                type="text"
-                name="itemName"
-                value={formValues.itemName}
-                onChange={handleInputChange}
-                className="bg-transparent focus:outline-black outline-dashed outline-[1px]"
-          style={{
-            width: `${formValues.borrower.length + 3}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-              />
+            <td className="border border-gray-400 px-4 py-2 underline underline-offset-2">
+              {itemName}
+            </td>
+            <td className="border border-gray-400 px-4 py-2 underline underline-offset-2">
+              {template.specification}
+            </td>
+            <td className="border border-gray-400 px-4 py-2 underline underline-offset-2">
+              {template.condition}
             </td>
             <td className="border border-gray-400 px-4 py-2">
-              <input
-                type="text"
-                name="specifications"
-                value={formValues.specifications}
-                onChange={handleInputChange}
-                className="bg-transparent focus:outline-black w-full outline-dashed outline-[1px]"
-                
-              />
-            </td>
-            <td className="border border-gray-400 px-4 py-2">
-              <input
-                type="number"
-                name="quantity"
-                value={formValues.quantity}
-                onChange={handleInputChange}
-                className="bg-transparent focus:outline-black w-full outline-dashed outline-[1px]"
-              />
-            </td>
-            <td className="border border-gray-400 px-4 py-2">
-              <input
-                type="text"
-                name="condition"
-                value={formValues.condition}
-                onChange={handleInputChange}
-                className="bg-transparent focus:outline-black w-full outline-dashed outline-[1px]"
-              />
-            </td>
-            <td className="border border-gray-400 px-4 py-2">
-              <input
-                type="text"
-                name="notes"
-                value={formValues.notes}
-                onChange={handleInputChange}
-                className="bg-transparent focus:outline-black w-full outline-dashed outline-[1px]"
-              />
+              {template.note || "-"}
             </td>
           </tr>
         </tbody>
       </table>
-      <p className="mt-4">
-        차용인은 위 물품을 틀림없이 차용(임대)하였으며, 아래와 같이 이행할 것을 확약한다.
-      </p>
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 1조(차용기간 및 장소)</h2>
-      <p>
-        1. 대여인은 차용인에게{" "}
-        <input
-          type="date"
-          name="rentalEndDate"
-          value={formValues.rentalEndDate}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}
-        까지 해당 물품을 임대해야 한다. 해당 물품의 대여장소는{" "}
-        <input
-          type="text"
-          name="rentalPlace"
-          value={formValues.rentalPlace}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalPlace.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}로 정한다. 위 대여장소의 상세주소는 다음과 같다.
-      </p>
-      <p>- 상세주소: {" "}
-        <input
-          type="string"
-          name="rentalDetailAddress"
-          value={formValues.rentalDetailAddress}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalDetailAddress.length + 5}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}</p><p className="mt-2">
-        2. 본 계약에 따라 차용인은 임대기간 종료 후 {" "}
-        <input
-          type="date"
-          name="returnDate"
-          value={formValues.returnDate}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.returnDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}까지 해당 물품을 대여인에게 반납해야 한다. 해당 물품의 반납장소는{" "}
-        <input
-          type="text"
-          name="returnPlace"
-          value={formValues.returnPlace}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}
-        로 정한다. 위 반납장소의 상세주소는 다음과 같다.
-      </p>
-      <p>- 상세주소: {" "}
-        <input
-          type="text"
-          name="returnDetailAddress"
-          value={formValues.returnDetailAddress}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.returnDetailAddress.length + 5}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}</p>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 2조(임대료의 납부)</h2>
-      <p>
-        차용물품에 대한 임대료는{" "}
-        <input
-          type="text"
-          name="rentalFee"
-          value={formValues.rentalFee}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}
-        으로 정한다. 차용인은 {" "}
-        <input
-          type="date"
-          name="paymentDate"
-          value={formValues.paymentDate}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.paymentDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}에 임대료를 일시지급해야하며, 연체 시 차용인은 본 계약에 따른 불이익을 받을 수 있다.
-      </p>
-
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 3조(지연손해금)</h2>
-      <p>
-        1. 차용인이 약정된 기일을 초과하여, 임대료 납부를 게을리하였을 경우 차용인은
-        지연이자로써 일 {" "}
-        <input
-          type="number"
-          name="lateInterestRate"
-          value={formValues.lateInterestRate}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />
-        % 를 청구할 수 있다. 이에 차용인은 이의 없이 본 조항에 따라야 한다.
-      </p>
-      <p className="mt-2">
-        2. 차용인이 약정된 기일을 초과하여, 해당물품 반납을 게을리하였을 경우 지연손해금으로
-        물품가액의{" "}
-        <input
-          type="number"
-          name="latePenaltyRate"
-          value={formValues.latePenaltyRate}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />
-        %를 청구할 수 있다. 이에 차용인은 이의 없이 본 조항에 따라야 한다.
-      </p>
-
-      <h2 className="text-2xl font-semibold mt-6 mb-4">제 4조(위험부담 및 면책조항)</h2>
-      <p>
-        1. 차용인의 귀책사유로 본 계약 물품에 파손, 훼손 또는 멸실이 발생한 경우 차용인은
-        신품 가격의 {" "}
-        <input
-          type="number"
-          name="damageCompensationRate"
-          value={formValues.damageCompensationRate}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />
-        %를 배상하여야 한다.
-      </p>
-      <p className="mt-2">
-        2. 전항의 파손, 훼손 또는 멸실이 천재지변, 사변, 국가비상사태 등 불가항력으로 인한
-        것일 경우 차용인은 배상책임을 면한다.
-      </p>
-
-      <p className="mt-6 text-center font-medium">{" "}
-        <input
-          type="date"
-          name="createdDate"
-          value={formValues.createdDate}
-          onChange={handleInputChange}
-          className="bg-transparent min-w-[100px] w-fit focus:outline-black font-semibold outline-dashed outline-[1px]"
-          placeholder="오늘 날짜"
-          style={{
-            width: `${formValues.createdDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-        />{" "}</p>
-
-      <div className="mt-8 text-center">
+      {/* 장소/기간 */}
+      <h2 className="text-2xl font-semibold mt-6 mb-2">제 2조 (차용 기간 및 장소)</h2>
+      <div className="space-y-1">
         <p>
-          <strong>대여인:</strong>{" "}
-          <input
-            type="text"
-            name="lender"
-            value={formValues.lender}
-            onChange={handleInputChange}
-            className="bg-transparent min-w-[50px] w-fit focus:outline-black outline-dashed outline-[1px]"
-          placeholder="입력"
-          style={{
-            width: `${formValues.rentalEndDate.length + 0}ch`, // 입력 글자수에 따라 인풋필드 크기 변경하도록~
-          }}
-          />
+          ① 차용 기간은{" "}
+          <strong className="underline underline-offset-2">{fmt(startDate)}</strong> 부터{" "}
+          <strong className="underline underline-offset-2">{fmt(endDate)}</strong> 까지로 한다.
         </p>
         <p>
-          <strong>차용인:</strong> <span className="underline underline-offset-2">{borrower}</span>
+          ② 대여 장소는{" "}
+          <strong className="underline underline-offset-2">{template.rentalPlace}</strong>
+          {" "}로 하고, 반납 장소는{" "}
+          <strong className="underline underline-offset-2">{template.returnPlace}</strong>
+          {" "}로 한다.
         </p>
       </div>
+
+      {/* 비용/지연 */}
+      <h2 className="text-2xl font-semibold mt-6 mb-2">제 3조 (임대료 및 지연 손해금)</h2>
+      <div className="space-y-1">
+        <p>
+          ① 임대료 및 지급 시점은 상품 상세 및 별도 안내에 따른다.
+        </p>
+        <p>
+          ② 차용인이 약정된 기일을 초과하여 임대료 지급을 지체한 경우, 지연 이자율{" "}
+          <strong className="underline underline-offset-2">{template.lateInterestRate}%</strong>
+          {" "}를 적용한다.
+        </p>
+        <p>
+          ③ 차용인이 약정된 반납일을 지체한 경우, 지연 손해금{" "}
+          <strong className="underline underline-offset-2">{template.latePenaltyRate}%</strong>
+          {" "}를 적용한다.
+        </p>
+      </div>
+
+      {/* 손상/배상 */}
+      <h2 className="text-2xl font-semibold mt-6 mb-2">제 4조 (위험부담 및 면책)</h2>
+      <div className="space-y-1">
+        <p>
+          ① 차용인의 귀책사유로 물품에 파손·훼손·멸실이 발생한 경우, 차용인은 신품가의{" "}
+          <strong className="underline underline-offset-2">{template.damageCompensationRate}%</strong>
+          {" "}에 해당하는 금액을 배상한다.
+        </p>
+        <p>
+          ② 천재지변, 사변, 국가 비상사태 등 불가항력 사유로 발생한 손해에 대해서는 배상책임을 면한다.
+        </p>
+      </div>
+
+      {/* 유의/부가 조항 (선택적) */}
+      <h2 className="text-2xl font-semibold mt-6 mb-2">제 5조 (기타)</h2>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>본 계약에 명시되지 않은 사항은 관계 법령 및 일반 상관례를 따른다.</li>
+        <li>필요 시 대여인과 차용인은 상호 합의하여 별도의 특약을 추가할 수 있다.</li>
+      </ul>
+
+      <p className="mt-6 text-center text-sm text-gray-500">
+        ※ 본 화면은 템플릿 기반의 계약 요약본으로, 차용인이 동의 시 서버에서 예약 및 승인 절차가 자동 처리됩니다.
+      </p>
     </div>
   );
-};
+}

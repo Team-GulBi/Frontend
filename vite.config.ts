@@ -16,7 +16,7 @@ export default defineConfig({
   server: {
     proxy: {
     "/api": {
-      target: "http://54.180.162.59:8080", // 포트 포함
+      target: "http://13.125.214.207:8080", // 포트 포함
       changeOrigin: true,
       rewrite: (path) => path.replace(/^\/api/, "/api"), // 또는 생략 가능
     },
