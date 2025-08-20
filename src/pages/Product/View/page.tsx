@@ -266,7 +266,6 @@ const ProductViewPage = () => {
       </div>
       {isReserveModalOpen && (
         <ReserveModal
-          mode="borrower"
           productId={Number(id)}
           onClose={() => setIsReserveModalOpen(false)}
         />

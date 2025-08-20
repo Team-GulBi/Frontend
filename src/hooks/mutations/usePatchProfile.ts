@@ -3,8 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 export interface ProfileRequest {
-  profileId: number;
-  phone: string;
+  phoneNumber: string;
   file: File;
 }
 
@@ -20,10 +19,9 @@ const patchProfile = async (
   const formData = new FormData();
 
   formData.append('file', request.file);
-  formData.append('text', JSON.stringify({ phone: request.phone }));
 
   const response = await client.patch<ProfileResponse>(
-    `/profiles/${request.profileId}`,
+    `/users?phoneNumber=${request.phoneNumber}`,
     formData,
     {
       headers: { 'Content-Type': undefined as any },
@@ -49,8 +47,8 @@ const usePatchProfile = () => {
 
   return useMutation<ProfileResponse, AxiosError, ProfileRequest>({
     mutationFn: patchProfile,
-    onSuccess: (_d, v) => {
-      queryClient.invalidateQueries({ queryKey: ['profile', v.profileId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 };
