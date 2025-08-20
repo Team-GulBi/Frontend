@@ -1,6 +1,9 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
 import refreshToken from './refresh';
 
+// refresh 토큰 호출 중인지 확인하는 플래그
+let isRefreshing = false;
+
 const client = axios.create({
   baseURL: import.meta.env.VITE_YAJOBA_SEVER_URL,
   withCredentials: true,
@@ -31,9 +34,10 @@ client.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-        
-    if (error.response?.status >= 400 && !originalRequest._retry) {
+    
+    if (!isRefreshing && error.response?.status >= 400 && !originalRequest._retry) {
       originalRequest._retry = true;
+      isRefreshing = true;
       
       try {
         await refreshToken();
@@ -48,6 +52,8 @@ client.interceptors.response.use(
         localStorage.clear();
         window.location.replace("/");
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
     
