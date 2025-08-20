@@ -6,19 +6,20 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  id: string;
-  token: string; // 서버응답 토큰
+  accessToken: string;
+  nickname: string;
+  userId: string;
 }
 
 // 로그인 API 함수
 const login = async (data: LoginRequest): Promise<LoginResponse> => {
-  const response = await client.post<LoginResponse>('/signin', data);
-  const token = response.data.token;
-  const id = response.data.id;
+  const response = await client.post<LoginResponse>('/auth/login', data);
+  const { accessToken, nickname, userId } = response.data;
 
-  // 토큰을 로컬 스토리지에 저장
-  localStorage.setItem('token', token);
-  localStorage.setItem('userId', id.toString());
+  localStorage.setItem('token', accessToken);
+  localStorage.setItem('nickname', nickname);
+  localStorage.setItem('userId', userId);
+  
   window.location.replace("/");
   return response.data;
 };
