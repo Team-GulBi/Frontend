@@ -64,7 +64,6 @@ const MyPage = () => {
             {isModalOpen && (
               <ProfileModifyModal
                 setIsModalOpen={setIsModalOpen}
-                userId={userId}
               />
             )}
 
