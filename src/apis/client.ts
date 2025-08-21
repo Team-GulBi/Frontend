@@ -15,7 +15,7 @@ const client = axios.create({
 client.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     config.withCredentials = true;
-    const accessToken = localStorage.getItem('token'); 
+    const accessToken = localStorage.getItem('token');
     if (accessToken) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -34,29 +34,37 @@ client.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
-    if (!isRefreshing && error.response?.status >= 400 && !originalRequest._retry) {
+
+    const isAuthRequired =
+      originalRequest.url !== '/users/signup' &&
+      originalRequest.url !== '/auth/login';
+    if (
+      !isRefreshing &&
+      error.response?.status >= 400 &&
+      !originalRequest._retry &&
+      isAuthRequired
+    ) {
       originalRequest._retry = true;
       isRefreshing = true;
-      
+
       try {
         await refreshToken();
-        
+
         const newAccessToken = localStorage.getItem('token');
-        
+
         if (newAccessToken) {
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return client(originalRequest);
         }
       } catch (refreshError) {
         localStorage.clear();
-        window.location.replace("/");
+        window.location.replace('/');
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
-    
+
     return Promise.reject(error);
   },
 );

@@ -24,13 +24,11 @@ const signup = async (data: SignupRequest): Promise<void> => {
   );
   formData.append('signature', data.signature);
 
-  await client.post('/signup', formData, {
+  await client.post('/users/signup', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
-
-  window.location.replace('/login');
 };
 
 export default signup;
