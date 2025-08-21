@@ -34,7 +34,7 @@ const MyPage = () => {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null,
   );
-  const userId = Number(localStorage.getItem('userId'));
+  const nickname = localStorage.getItem('nickname');
 
   const handleCalendarClick = (productId: number) => {
     setSelectedProductId(productId);
@@ -46,30 +46,19 @@ const MyPage = () => {
       <HeaderWithSearch />
       <div className="w-full flex-col px-[240px] py-[120px]">
         <div className="mb-[35px] flex items-center">
-          <img
-            src={profile}
-            alt="profile"
-            className="mr-[30px] h-[140px] w-[140px] rounded-full border border-neutral-80 p-3 shadow-md"
-          />
-          <div className="w-full flex-col">
+          <div className="my-5 flex w-full flex-col justify-center">
             <div className="flex justify-between">
               <div className="flex gap-3">
-                <div className="text-xlarge28 font-semibold text-neutral-0">
-                  지니핑
+                <div className="text-xxlarge32 font-semibold text-neutral-0">
+                  {nickname}
                 </div>
                 <EditProfile onClick={() => setIsModalOpen(true)} />
               </div>
             </div>
 
             {isModalOpen && (
-              <ProfileModifyModal
-                setIsModalOpen={setIsModalOpen}
-              />
+              <ProfileModifyModal setIsModalOpen={setIsModalOpen} />
             )}
-
-            <span className="text-xsmall14 font-medium text-neutral-30">
-              집 가고 싶어요
-            </span>
           </div>
         </div>
 
@@ -83,7 +72,9 @@ const MyPage = () => {
             onClick={() => setActiveTab('owned')}
           >
             <Bag />
-            <span className="text-small16 font-semibold">지니핑님 상품</span>
+            <span className="text-small16 font-semibold">
+              {nickname}님의 상품
+            </span>
           </button>
 
           <button
@@ -95,7 +86,9 @@ const MyPage = () => {
             onClick={() => setActiveTab('rented')}
           >
             <Cart />
-            <span className="text-small16 font-semibold">대여중인 상품</span>
+            <span className="text-small16 font-semibold">
+              {nickname}님이 대여한 상품
+            </span>
           </button>
         </div>
 
