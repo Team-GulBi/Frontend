@@ -17,7 +17,7 @@ import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
 import useGetProductDetail from '@/hooks/queries/useGetProductDetail';
 import useSeperateTags from '@/hooks/utils/useSeperateTags';
 import { useDeleteProduct } from '@/hooks/mutations';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DeleteModal } from '@/components/common/DeleteModal';
 import { ReserveModal } from '@/components/Product/ReserveModal';
 
@@ -30,6 +30,10 @@ const ProductViewPage = () => {
   const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
 
   const tagList = useSeperateTags(data?.data?.tag || '');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleNavigatePage = () => {
     navigate('/');
