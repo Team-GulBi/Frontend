@@ -2,6 +2,11 @@ import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import svgr from "@svgr/rollup";
+import { loadEnv } from "vite";
+
+// https://vitejs.dev/config/
+
+const env = loadEnv("", process.cwd(), "");
 
 export default defineConfig({
   plugins: [react(), svgr()],
@@ -15,18 +20,16 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
-        target: "http://13.124.22.46:8080",
+      "/s3": {
+        target: env.VITE_YAJOBA_S3_PROXY_URL,
         changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, "/api"), // ✅ 핵심!
+        rewrite: (path) => path.replace(/^\/s3/, ""),
       },
-      "/ws-stomp": {
-        target: "ws://13.124.22.46:8080", // 백엔드 주소
-        ws: true, // WebSocket 프록시 활성화
-        changeOrigin: true, // 도메인 변경 허용
-        secure: false, // HTTPS가 아니라면 false
-      },
+    "/api": {
+      target: env.VITE_YAJOBA_SERVER_PROXY_URL,
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, "/api"),
+    },
     },
   },
 });

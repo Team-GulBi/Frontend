@@ -6,7 +6,6 @@ import ProductViewPage from "@/pages/Product/View/page";
 import ChatPage from "@/pages/Chat/page";
 import LoginPage from "@/pages/Auth/Login/page";
 import SignupPage from "@/pages/Auth/Signup/page";
-import OnboardingPage from "@/pages/Onboarding/page";
 import MyPage from "@/pages/Mypage/page";
 import SearchPage from "@/pages/Search/page";
 import DefaultContractPage from "@/pages/contract/DefaultPage";

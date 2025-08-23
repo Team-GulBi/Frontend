@@ -1,16 +1,7 @@
 import logo from '@/assets/images/logo.png';
-import { Button } from '@/components/ui/button';
-import { ReactComponent as Dropdown } from '@/assets/svgs/dropdown.svg';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useActiveLink } from '@/hooks/utils/useActiveLink';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-
 
 export const HeaderWithSearch = () => {
   const isProductPage = useActiveLink('/product');
@@ -22,12 +13,17 @@ export const HeaderWithSearch = () => {
   const navigate = useNavigate();
 
   const handleRedirect = (url: string) => {
-    const isLoggedIn = Boolean(localStorage.getItem('token')); // 버튼 클릭시 token 유무로 로그인 상태 확인
+    const isLoggedIn = Boolean(localStorage.getItem('token'));
     if (isLoggedIn) {
-      navigate(url); // 로그인 상태면 해당 URL로 이동
+      navigate(url);
     } else {
-      navigate('/login'); // 로그아웃 상태면 /login으로 이동
+      navigate('/login');
     }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -45,34 +41,20 @@ export const HeaderWithSearch = () => {
 
   return (
     <div className="bg-static-100 fixed top-0 z-30 w-screen border-b border-neutral-80 bg-primary-0 px-10 shadow-[2px_0px_2px_1px_rgba(0,0,0,0.05)]">
-      <div className="flex h-[4.8rem] items-center justify-between">
+      <div className="flex h-[4.85rem] items-center justify-between">
         <div className="flex items-center gap-[2rem]">
-          <a className="h-[2.2rem] w-full" href="/">
+          <a className="h-[2.2rem] w-full cursor-pointer" onClick={handleLogoClick}>
             <img className="h-full" src={logo} alt="야줘바 로고" />
           </a>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center rounded-md border border-neutral-70 pl-2 pr-5">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                  className="mr-2 flex w-[100px] items-center justify-between bg-neutral-90 text-xsmall14 text-neutral-30">
-                    <span>{selectedFilter}</span>
-                    <Dropdown className="pt-[3px]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="font-regular bg-white py-[6px] text-xsmall14 text-neutral-10">
-                  <DropdownMenuItem onClick={() => setSelectedFilter('제목')}>제목</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedFilter('태그')}>태그</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedFilter('장소')}>장소</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="원하시는 상품을 입력해주세요"
-                className="text-small15 h-1/2 w-[33rem] border-none py-4 pl-1 pr-3 text-neutral-10 placeholder-neutral-50 outline-none"
+                className="text-xsmall14 font-medium h-1/2 w-[33rem] border-none py-3 pl-1 pr-3 text-neutral-10 placeholder-neutral-50 outline-none"
                 onKeyDown={handleKeyDown}
               />
               <svg
@@ -171,24 +153,27 @@ export const HeaderWithoutSearch = () => {
   const isProductPage = useActiveLink('/product');
   const isChatPage = useActiveLink('/chat');
   const isMypage = useActiveLink('/profile');
-
   const navigate = useNavigate();
 
   const handleRedirect = (url: string) => {
-    const isLoggedIn = Boolean(localStorage.getItem('token')); // 버튼 클릭시 token 유무로 로그인 상태 확인
+    const isLoggedIn = Boolean(localStorage.getItem('token'));
     if (isLoggedIn) {
-      navigate(url); // 로그인 상태면 해당 URL로 이동
+      navigate(url);
     } else {
-      navigate('/login'); // 로그아웃 상태면 /login으로 이동
+      navigate('/login');
     }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/');
   };
 
   return (
     <div className="bg-static-100 fixed top-0 z-30 w-screen border-b border-neutral-80 bg-primary-0 px-10 shadow-[2px_0px_2px_1px_rgba(0,0,0,0.05)]">
       <div className="flex h-[4.85rem] items-center justify-between">
         <div className="flex items-center gap-4">
-          <a className="h-[2.2rem] w-full" 
-          onClick={() => handleRedirect('/')}>
+          <a className="h-[2.2rem] w-full cursor-pointer" onClick={handleLogoClick}>
             <img className="h-full" src={logo} alt="야줘바 로고" />
           </a>
         </div>

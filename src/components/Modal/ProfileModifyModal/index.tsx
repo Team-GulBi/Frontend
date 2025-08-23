@@ -4,10 +4,10 @@ import usePatchProfile from '@/hooks/mutations/usePatchProfile';
 import { useGetProfile } from '@/hooks/queries';
 import { ReactComponent as XIcon } from '@/assets/svgs/XIcon.svg';
 
-type ModalProps = { setIsModalOpen: (isOpen: boolean) => void; userId: number };
+type ModalProps = { setIsModalOpen: (isOpen: boolean) => void };
 
-export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
-  const { data: profileData, isLoading } = useGetProfile(userId);
+export const ProfileModifyModal = ({ setIsModalOpen }: ModalProps) => {
+  const { data: profileData, isLoading } = useGetProfile();
   const { mutateAsync: updateProfile, isPending } = usePatchProfile();
 
   const [phone, setPhone] = useState('');
@@ -17,7 +17,7 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
 
   useEffect(() => {
     if (profileData) {
-      setPhone(profileData.phone ?? '');
+      setPhone(profileData.phoneNumber ?? '');
       setSignatureUrl(profileData.signature ?? null);
     }
   }, [profileData]);
@@ -41,7 +41,10 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
     };
   }, [signatureUrl]);
 
-  const clearSignature = () => sigRef.current?.clear();
+  const clearSignature = () => {
+    sigRef.current?.clear();
+    setSignatureUrl(null);
+  };
 
   const canvasToFile = (
     canvas: HTMLCanvasElement,
@@ -80,16 +83,14 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
     }
     if (!sigRef.current) return;
 
-    if (sigRef.current.isEmpty()) {
-      setErrorMsg('서명을 입력해주세요.');
-      return;
-    }
-
     let file: File | undefined;
-    try {
-      file = await canvasToFile(sigRef.current.getCanvas(), 'signature.png');
-    } catch {
-      file = undefined;
+    
+    if (!sigRef.current.isEmpty()) {
+      try {
+        file = await canvasToFile(sigRef.current.getCanvas(), 'signature.png');
+      } catch {
+        file = undefined;
+      }
     }
 
     if (!file && signatureUrl) {
@@ -100,10 +101,15 @@ export const ProfileModifyModal = ({ setIsModalOpen, userId }: ModalProps) => {
       }
     }
 
+    if (!file && sigRef.current.isEmpty() && !signatureUrl) {
+      setErrorMsg('서명을 입력해주세요.');
+      return;
+    }
+
     if (!file) file = makeBlankPngFile();
 
     try {
-      await updateProfile({ profileId: userId, phone, file });
+      await updateProfile({ phoneNumber: phone, file });
       setIsModalOpen(false);
     } catch (e) {
       console.error(e);

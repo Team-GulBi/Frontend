@@ -51,12 +51,12 @@ const MainPage = () => {
   }, []);
   
   return (
-    <div className="min-h-screen flex flex-col items-center mb-10">
+    <div className="min-h-screen w-screen flex flex-col items-center mb-10">
       {isLoggedIn ? <HeaderWithSearch /> : <LoginHeader />}
       <div className="flex flex-col w-full items-center justify-center pt-[75px]">
         <div className='relative flex w-full items-center justify-center h-[300px] py-10 shadow-lg bg-primary-10'>
           <Main 
-            width="420"
+            width="380"
             height="250"
             viewBox="0 0 900 600"
           />
@@ -65,7 +65,7 @@ const MainPage = () => {
                 불필요한 소비를 줄이는 공유경제
               </p>
               <p className="gonggothicmedium text-xxlarge36 font-bold text-neutral-30">
-                <span className='text-primary-100'>Ya!joba</span>로 시작해볼까요?
+                <span className='text-primary-100'>Ya ! joba</span>로 시작해볼까요?
               </p>
           </div>
         </div>
@@ -95,6 +95,7 @@ const MainPage = () => {
                     imageSrc={product.imageSrc}
                     price={product.price}
                     productId={1}
+                    onCalendarClick={() => {}}
                   />
                 ))}
               </div>
@@ -125,6 +126,7 @@ const MainPage = () => {
                     imageSrc={product.imageSrc}
                     price={product.price}
                     productId={1}
+                    onCalendarClick={() => {}}
                   />
                 ))}
               </div>

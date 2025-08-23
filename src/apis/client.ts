@@ -1,4 +1,8 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
+import refreshToken from './refresh';
+
+// refresh 토큰 호출 중인지 확인하는 플래그
+let isRefreshing = false;
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_YAJOBA_SEVER_URL,
@@ -11,10 +15,10 @@ const client = axios.create({
 client.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     config.withCredentials = true;
-    const token = localStorage.getItem('token'); 
-    if (token) {
+    const accessToken = localStorage.getItem('token');
+    if (accessToken) {
       config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
@@ -26,17 +30,42 @@ client.interceptors.request.use(
 
 client.interceptors.response.use(
   (res) => {
-    if (res.data.refreshed) {
-      const new_Token = res.headers["authorization"];
-      localStorage.setItem("accessToken", new_Token);
-    }
     return res;
   },
-  (error) => {if (error.response?.status === 401) {
-    localStorage.clear();
-    window.location.replace("/"); // 401 뜨면 메인페이지로 이동
-  }
-  return Promise.reject(error);
+  async (error) => {
+    const originalRequest = error.config;
+
+    const isAuthRequired =
+      originalRequest.url !== '/users/signup' &&
+      originalRequest.url !== '/auth/login';
+    if (
+      !isRefreshing &&
+      error.response?.status >= 400 &&
+      !originalRequest._retry &&
+      isAuthRequired
+    ) {
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        await refreshToken();
+
+        const newAccessToken = localStorage.getItem('token');
+
+        if (newAccessToken) {
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return client(originalRequest);
+        }
+      } catch (refreshError) {
+        localStorage.clear();
+        window.location.replace('/');
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
   },
 );
 

@@ -3,40 +3,70 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProductDetailResponse } from '../queries/useGetProductDetail';
 
 type ProductRequest = {
-  tag: string;
-  title: string;
-  name: string;
-  price: string;
-  sido: string;
-  sigungu: string;
-  bname: string;
-  description: string;
-  bcategoryId: number;
-  mcategoryId: number;
-  scategoryId: number;
+  product: {
+    title: string;
+    name: string;
+    price: number;
+    sido: string;
+    sigungu: string;
+    bname: string;
+    description: string;
+    bcategoryId: number;
+    mcategoryId: number;
+    scategoryId: number;
+  };
+  template: {
+    specification: string;
+    condition: string;
+    note: string;
+    rentalPlace: string;
+    returnPlace: string;
+    lateInterestRate: number;
+    latePenaltyRate: number;
+    damageCompensationRate: number;
+  };
   images: File[];
   mainImage: File;
 };
 
-const postProduct = async (request: ProductRequest): Promise<ProductDetailResponse> => {
+const postProduct = async (
+  request: ProductRequest,
+): Promise<ProductDetailResponse> => {
   const formData = new FormData();
   const productData = {
-    tag: request.tag,
-    title: request.title,
-    name: request.name,
-    price: request.price,
-    sido: request.sido,
-    sigungu: request.sigungu,
-    bname: request.bname,
-    description: request.description,
-    bcategoryId: request.bcategoryId,
-    mcategoryId: request.mcategoryId,
-    scategoryId: request.scategoryId,
+    title: request.product.title,
+    name: request.product.name,
+    price: request.product.price,
+    sido: request.product.sido,
+    sigungu: request.product.sigungu,
+    bname: request.product.bname,
+    description: request.product.description,
+    bcategoryId: request.product.bcategoryId,
+    mcategoryId: request.product.mcategoryId,
+    scategoryId: request.product.scategoryId,
+  };
+
+  const templateData = {
+    specification: request.template.specification,
+    condition: request.template.condition,
+    note: request.template.note,
+    rentalPlace: request.template.rentalPlace,
+    returnPlace: request.template.returnPlace,
+    lateInterestRate: request.template.lateInterestRate,
+    latePenaltyRate: request.template.latePenaltyRate,
+    damageCompensationRate: request.template.damageCompensationRate,
   };
 
   formData.append(
-    'body',
+    'product',
     new Blob([JSON.stringify(productData)], {
+      type: 'application/json',
+    }),
+  );
+
+  formData.append(
+    'template',
+    new Blob([JSON.stringify(templateData)], {
       type: 'application/json',
     }),
   );
@@ -51,25 +81,38 @@ const postProduct = async (request: ProductRequest): Promise<ProductDetailRespon
       formData.append('images', file);
     });
 
-  const response = await client.post<ProductDetailResponse>('/products', formData, {
-    // headers: {
-    //   // 'Content-Type': 'multipart/form-data',
-    // },
-  });
+  const response = await client.post<ProductDetailResponse>(
+    '/products',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
 
   return response.data;
 };
 
-const usePostProduct = () => {
+const usePostProduct = (
+  onSuccess?: () => void,
+  onError?: (error: Error) => void,
+) => {
   const queryClient = useQueryClient();
   return useMutation<ProductDetailResponse, Error, ProductRequest>({
     mutationFn: postProduct,
     onSuccess: (data) => {
       console.log(data);
       queryClient.invalidateQueries({ queryKey: ['product'] });
+      if (onSuccess) {
+        onSuccess();
+      }
     },
     onError: (error) => {
       console.error(error);
+      if (onError) {
+        onError(error);
+      }
     },
   });
 };
