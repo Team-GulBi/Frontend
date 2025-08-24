@@ -73,7 +73,7 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen flex w-screen flex-col">
       <HeaderWithSearch />
-      <div className="mb-7 mt-[130px] flex w-full flex-col justify-center pl-[200px] pr-[340px]">
+      <div className="mb-7 mt-[130px] flex w-full flex-col justify-center pl-[200px] pr-[200px]">
         {allProducts.length > 0 ? (
           <>
             <span className="text-large22 font-medium text-neutral-0">
