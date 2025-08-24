@@ -11,6 +11,7 @@ const RoutePath = {
     Signup: "/signup",
 
     MyPage: "/profile",
+    UserProfile: "/profile/:id",
 
     Search: "/search",
 
