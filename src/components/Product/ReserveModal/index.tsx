@@ -148,19 +148,7 @@ export const ReserveModal = ({
     setShowReservationForm(true);
   };
 
-  const isTimeOverlap = (
-    start1: string,
-    end1: string,
-    start2: string,
-    end2: string,
-  ) => {
-    const start1Time = new Date(`2000-01-01T${start1}`).getTime();
-    const end1Time = new Date(`2000-01-01T${end1}`).getTime();
-    const start2Time = new Date(`2000-01-01T${start2}`).getTime();
-    const end2Time = new Date(`2000-01-01T${end2}`).getTime();
 
-    return start1Time < end2Time && start2Time < end1Time;
-  };
 
   const generateDateRange = (startDate: string, endDate: string) => {
     const dates = [];

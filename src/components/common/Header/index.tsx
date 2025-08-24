@@ -7,7 +7,7 @@ export const HeaderWithSearch = () => {
   const isProductPage = useActiveLink('/product');
   const isChatPage = useActiveLink('/chat');
   const isMypage = useActiveLink('/profile');
-  const [selectedFilter, setSelectedFilter] = useState('제목');
+  const [selectedFilter] = useState('제목');
   const [searchInput, setSearchInput] = useState("");
 
   const navigate = useNavigate();

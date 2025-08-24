@@ -10,7 +10,6 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { HeaderWithoutSearch } from '@/components/common/Header';
-import { ReadyToRentChip } from '@/components/common/ProductStatusChip';
 import { NavigateButton } from '@/components/Product/Button/NavigateButton';
 import { ProductRelatedButton } from '@/components/Product/Button/ProductRelatedButton';
 import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
@@ -136,7 +135,6 @@ const ProductViewPage = () => {
               </span>
             </div>
             <div className="flex items-center space-x-2 text-small16 text-neutral-40">
-              <ReadyToRentChip />
               <span>{data?.data?.productCategories?.bigName}</span>
               <RightArray />
               <span>{data?.data?.productCategories?.midName}</span>

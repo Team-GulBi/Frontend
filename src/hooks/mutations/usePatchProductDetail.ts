@@ -86,7 +86,7 @@ const usePatchProductDetail = (
   const queryClient = useQueryClient();
   return useMutation<ProductDetailResponse, Error, ProductDetailRequest>({
     mutationFn: patchProductDetail,
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: ['product'] });
       if (onSuccess) {
         onSuccess();

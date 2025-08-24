@@ -30,7 +30,7 @@ const ProductEditPage = () => {
   const [sido, setSido] = useState<string>('');
   const [sigungu, setSigungu] = useState<string>('');
   const [bname, setBname] = useState<string>('');
-  const [tag, setTag] = useState<string>('');
+
   const [bcategoryId, setBCategoryId] = useState<number | undefined>(undefined);
   const [mcategoryId, setMCategoryId] = useState<number | undefined>(undefined);
   const [scategoryId, setSCategoryId] = useState<number | undefined>(undefined);
