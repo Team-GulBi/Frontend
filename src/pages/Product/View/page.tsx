@@ -60,7 +60,39 @@ const ProductViewPage = () => {
     });
   };
 
-  if (isLoading || isPending) return <div>로딩 중...</div>;
+  if (isLoading || isPending) {
+    return (
+      <div className="min-h-screen flex w-screen flex-col">
+        <HeaderWithoutSearch />
+        <div className="flex h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="mb-8">
+              <div className="flex justify-center space-x-[6px]">
+                <div
+                  className="h-5 w-5 animate-ping rounded-full bg-secondary-100"
+                  style={{ animationDelay: '0s' }}
+                ></div>
+                <div
+                  className="h-5 w-5 animate-ping rounded-full bg-secondary-100"
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
+                <div
+                  className="h-5 w-5 animate-ping rounded-full bg-secondary-100"
+                  style={{ animationDelay: '0.4s' }}
+                ></div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-large22 font-semibold text-neutral-0">
+                상품 정보를 불러오는 중이에요!
+              </p>
+              <p className="text-neutral-40">잠시만 기다려주세요</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex w-screen pb-[133px]">
