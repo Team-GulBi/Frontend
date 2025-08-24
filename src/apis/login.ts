@@ -7,17 +7,15 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
-  nickname: string;
   userId: string;
 }
 
 // 로그인 API 함수
 const login = async (data: LoginRequest): Promise<LoginResponse> => {
   const response = await client.post<LoginResponse>('/auth/login', data);
-  const { accessToken, nickname, userId } = response.data;
+  const { accessToken, userId } = response.data;
 
   localStorage.setItem('token', accessToken);
-  localStorage.setItem('nickname', nickname);
   localStorage.setItem('userId', userId);
   
   window.location.replace("/");
