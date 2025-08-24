@@ -19,7 +19,7 @@ export const Toast = ({
     if (isVisible) {
       setProgress(0);
       const startTime = Date.now();
-      const duration = 1800;
+      const duration = 2300;
 
       const updateProgress = () => {
         const elapsed = Date.now() - startTime;
