@@ -60,7 +60,11 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
   const handleSend = () => {
     if (!messageInput.trim()) return;
     if (!myUserId) return;
-
+    if (!isConnected) {
+    console.warn("WS 미연결 - 전송 불가");
+    alert("연결이 끊어졌어요. 잠시 후 다시 시도해 주세요.");
+    return;
+  }
     const clientMessageId = createClientMessageId();
     const nowUtcIso = new Date().toISOString();
 
@@ -89,10 +93,16 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
     setMessageInput("");
   };
 
-  const isMyMessageRead = (message: Message): boolean => {
-    return message.senderId === String(myUserId) && (message.receiverId !== null || message.isRead);
-  };
-
+  //   const isMyMessageRead = (message: Message): boolean => {
+  //   return message.senderId === String(myUserId) && message.isRead;
+  // }; 읽음처리 함수 추후 반영???
+  // 2) 렌더 직전, "내 메시지"의 최신 1~2개 인덱스 계산
+    const myIdStr = String(myUserId);
+    const selfIndices = chatMessages.reduce<number[]>((acc, m, i) => {
+      if (m.senderId === myIdStr) acc.push(i);
+      return acc;
+    }, []);
+    const showStatusSet = new Set(selfIndices.slice(-1)); // 최신 2개만
   return (
     <div className="flex h-[650px] w-[800px] flex-col rounded-[16px] bg-white shadow-lg">
       <div className="flex w-full items-center justify-between rounded-t-[16px] bg-white py-4 px-6">
@@ -147,15 +157,9 @@ export const ChatMessage = ({ chatRoomId, name, selfIntroduction, imgSrc }: Chat
                   )}
                 </div>
 
-                {/* 읽음/상태 표시 */}
-                {isMyMessage && (
-                  <span className="mt-1 text-[10px] text-neutral-40">
-                    {message.status === "pending"
-                      ? "전송 중…"
-                      : isMyMessageRead(message)
-                      ? "읽음"
-                      : "전송됨"}
-                  </span>
+               
+                {isMyMessage && showStatusSet.has(index) && (
+                  <span className="mt-1 text-[10px] text-neutral-40">전송됨</span>
                 )}
               </div>
             </div>

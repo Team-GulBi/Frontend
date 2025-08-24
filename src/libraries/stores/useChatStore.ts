@@ -150,49 +150,54 @@ export const useChatStore = create<ChatState>()((set, get) => ({
   },
 
   upsertMessage: (roomId, incoming) => {
-    set((state) => {
-      const list = state.messages[roomId] ?? [];
+  set((state) => {
+    const list = state.messages[roomId] ?? [];
+    const updated = [...list];
 
-      // 1) clientMessageId로 우선 매칭
-      if (incoming.clientMessageId) {
-        const idx = list.findIndex(
-          (m) => m.clientMessageId && m.clientMessageId === incoming.clientMessageId
-        );
-        if (idx >= 0) {
-          const merged = { ...list[idx], ...incoming, status: "sent" as const };
-          const updated = [...list];
-          updated[idx] = merged;
-          return { messages: { ...state.messages, [roomId]: sortMessages(updated) } };
-        }
-      }
-
-      // 2) 보정 매칭 (내용 동일 + 내 메시지 pending + 시간 근접)
-      const IN_WINDOW_MS = 60_000; // 60초 이내면 동일로 간주
-      const incomingTime = new Date(incoming.timestamp).getTime();
-      const approxIdx = list.findIndex((m) => {
-        if (m.chatRoomId !== incoming.chatRoomId) return false;
-        if (m.senderId !== incoming.senderId) return false;
-        if (m.content !== incoming.content) return false;
-        if (m.status !== "pending") return false;
-        const dt = Math.abs(new Date(m.timestamp).getTime() - incomingTime);
-        return dt <= IN_WINDOW_MS;
-      });
-      if (approxIdx >= 0) {
-        const merged = { ...list[approxIdx], ...incoming, status: "sent" as const };
-        const updated = [...list];
-        updated[approxIdx] = merged;
+    // 0) 같은 messageId 이미 있으면 그걸 갱신 (중복 차단)
+    if (incoming.id) {
+      const i = updated.findIndex((m) => m.id === incoming.id);
+      if (i >= 0) {
+        updated[i] = { ...updated[i], ...incoming, status: incoming.status ?? "sent" };
         return { messages: { ...state.messages, [roomId]: sortMessages(updated) } };
       }
+    }
 
-      // 3) 신규 추가
-      return {
-        messages: {
-          ...state.messages,
-          [roomId]: sortMessages([...list, incoming]),
-        },
-      };
+    // 1) clientMessageId로 매칭 (서버가 반사해주면 여기서 끝)
+    if (incoming.clientMessageId) {
+      const i = updated.findIndex(
+        (m) => m.clientMessageId && m.clientMessageId === incoming.clientMessageId
+      );
+      if (i >= 0) {
+        updated[i] = { ...updated[i], ...incoming, status: "sent" as const };
+        return { messages: { ...state.messages, [roomId]: sortMessages(updated) } };
+      }
+    }
+
+    // 2) 근사 병합 (내용 동일 + 내 메시지 pending 또는 sent&no-id + 시간 근접)
+    const IN_WINDOW_MS = 60_000; // 60초 권장
+    const incomingTime = new Date(incoming.timestamp).getTime();
+    const approxIdx = updated.findIndex((m) => {
+      if (m.chatRoomId !== incoming.chatRoomId) return false;
+      if (m.senderId !== incoming.senderId) return false;
+      if (m.content !== incoming.content) return false;
+      const dt = Math.abs(new Date(m.timestamp).getTime() - incomingTime);
+      if (dt > IN_WINDOW_MS) return false;
+      // receipt로 이미 sent가 되었지만 아직 서버 id가 없는 임시도 병합 허용
+      const isPendingOrTemp = m.status === "pending" || (m.status === "sent" && !m.id);
+      return isPendingOrTemp;
     });
-  },
+    if (approxIdx >= 0) {
+      updated[approxIdx] = { ...updated[approxIdx], ...incoming, status: "sent" as const };
+      return { messages: { ...state.messages, [roomId]: sortMessages(updated) } };
+    }
+
+    // 3) 신규 추가
+    updated.push(incoming);
+    return { messages: { ...state.messages, [roomId]: sortMessages(updated) } };
+  });
+},
+
 
   markMessageAsRead: async (messageId: string) => {
     await markMessageAsRead(Number(messageId)); // API는 number 기대

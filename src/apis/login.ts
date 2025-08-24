@@ -21,6 +21,9 @@ const login = async (data: LoginRequest): Promise<LoginResponse> => {
   localStorage.setItem('nickname', nickname);
   localStorage.setItem('userId', userId);
   
+  const setUserId = useUserStore.getState().setUserId;
+  setUserId(userId);
+
   window.location.replace("/");
   return response.data;
 };

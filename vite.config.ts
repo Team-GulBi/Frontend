@@ -30,6 +30,12 @@ export default defineConfig({
       changeOrigin: true,
       rewrite: (path) => path.replace(/^\/api/, "/api"),
     },
+    "/ws-stomp": {
+        target: env.VITE_YAJOBA_WS_URL, // 백엔드 주소
+        ws: true, // WebSocket 프록시 활성화
+        changeOrigin: true, // 도메인 변경 허용
+        secure: false, // HTTPS가 아니라면 false
+      },
     },
   },
 });
