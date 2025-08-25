@@ -21,7 +21,7 @@ export type ApplicationStatus = {
   applicationId: number;
 };
 
-const getProductDate = async (productId: number, date: string) => {
+export const getProductDate = async (productId: number, date: string) => {
   try {
     const response = await client.get<ProductDateResponse>(
       `/products/applications/dates/${productId}/${date}`,

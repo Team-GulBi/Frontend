@@ -5,7 +5,6 @@ import { ProductDetailResponse } from '../queries/useGetProductDetail';
 export type ProductDetailRequest = {
   productId: number;
   productInfo?: {
-    tag?: string;
     title?: string;
     name?: string;
     price?: number;
@@ -15,12 +14,12 @@ export type ProductDetailRequest = {
     description?: string;
   };
   category?: {
-    bCategoryId?: string;
-    mCategoryId?: string;
-    sCategoryId?: string;
+    bigCategoryId?: number;
+    midCategoryId?: number;
+    smallCategoryId?: number;
   };
-  addingImages?: File[] | null;
-  toBeUpdatedMainImageFile?: File | null;
+  addingImages?: File[];
+  toBeUpdatedMainImageFile?: File;
   toBeUpdatedMainimageUrl?: {
     mainImageUrl: string;
   };
@@ -35,29 +34,35 @@ const patchProductDetail = async (
   const formData = new FormData();
 
   if (request.productInfo && Object.keys(request.productInfo).length > 0) {
-    formData.append("productInfo", JSON.stringify(request.productInfo));
+    formData.append('productInfo', JSON.stringify(request.productInfo));
   }
 
   if (request.category && Object.keys(request.category).length > 0) {
-    formData.append("category", JSON.stringify(request.category));
+    formData.append('category', JSON.stringify(request.category));
   }
 
   if (request.addingImages && request.addingImages.length > 0) {
     request.addingImages.forEach((file) => {
-      formData.append("addingImages", file);
+      formData.append('addingImages', file);
     });
   }
 
   if (request.toBeUpdatedMainImageFile) {
-    formData.append("toBeUpdatedMainImageFile", request.toBeUpdatedMainImageFile);
+    formData.append(
+      'toBeUpdatedMainImageFile',
+      request.toBeUpdatedMainImageFile,
+    );
   }
 
   if (request.toBeUpdatedMainimageUrl) {
-    formData.append("toBeUpdatedMainimageUrl", JSON.stringify(request.toBeUpdatedMainimageUrl));
+    formData.append(
+      'toBeUpdatedMainimageUrl',
+      JSON.stringify(request.toBeUpdatedMainimageUrl),
+    );
   }
 
-   if (request.deletedImageId && request.deletedImageId.imagesId.length > 0) {
-    formData.append("deletedImageId", JSON.stringify(request.deletedImageId));
+  if (request.deletedImageId && request.deletedImageId.imagesId.length > 0) {
+    formData.append('deletedImageId', JSON.stringify(request.deletedImageId));
   }
 
   const response = await client.patch<ProductDetailResponse>(
@@ -68,22 +73,29 @@ const patchProductDetail = async (
         'Content-Type': 'multipart/form-data',
       },
       withCredentials: true,
-    }
+    },
   );
 
   return response.data;
 };
 
-const usePatchProductDetail = () => {
+const usePatchProductDetail = (
+  onSuccess?: () => void,
+  onError?: (error: Error) => void,
+) => {
   const queryClient = useQueryClient();
   return useMutation<ProductDetailResponse, Error, ProductDetailRequest>({
     mutationFn: patchProductDetail,
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: ['product'] });
+      if (onSuccess) {
+        onSuccess();
+      }
     },
     onError: (error) => {
-      console.error(error);
+      if (onError) {
+        onError(error);
+      }
     },
   });
 };

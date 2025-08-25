@@ -7,6 +7,7 @@ import ChatPage from "@/pages/Chat/page";
 import LoginPage from "@/pages/Auth/Login/page";
 import SignupPage from "@/pages/Auth/Signup/page";
 import MyPage from "@/pages/Mypage/page";
+import UserProfilePage from "@/pages/Mypage/[id]/page";
 import SearchPage from "@/pages/Search/page";
 import DefaultContractPage from "@/pages/contract/DefaultPage";
 import CompletedContractPage from "@/pages/contract/CompletedPage";
@@ -41,7 +42,10 @@ const routes: RouteObject[] = [
   },
   {
     path: RoutePath.MyPage,
-    element: <MyPage />,
+    children: [
+      { index: true, element: <MyPage />},
+      { path: RoutePath.UserProfile, element: <UserProfilePage />},
+    ],
   },
   {
     path: RoutePath.Search,
