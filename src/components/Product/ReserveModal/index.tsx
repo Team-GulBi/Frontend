@@ -256,6 +256,7 @@ export const ReserveModal = ({
       localStorage.setItem('reservation', JSON.stringify(reservation));
 
       setShowReservationForm(false);
+      navigate('/contract/input');
     } catch (error) {
       setToastMessage('다시 시도해주세요.');
       setToastType('error');

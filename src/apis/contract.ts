@@ -106,10 +106,9 @@ export type ProductTemplateDTO = {
   latePenaltyRate: number;
   damageCompensationRate: number;
 
-  // 서버에서 곧 추가 예정 → optional
   lenderName?: string;
   borrowerName?: string;
-  itemName?: string;
+  productName?: string;
 };
 
 /** (A) 템플릿 조회 */

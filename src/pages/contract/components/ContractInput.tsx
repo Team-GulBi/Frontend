@@ -11,10 +11,17 @@ const fmt = (iso?: string) => {
   if (!iso) return "-";
   const d = new Date(iso);
   return d
-    .toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
-    .replace(/\./g, "-")
-    .replace(/ /g, "")
-    .replace(/-$/, "");
+    .toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+    .replace(/\./g, ".")
+    .replace(/-\s*(?=\d{2}:)/, " ") 
+    .replace(/-+$/, ""); 
 };
 
 export function ContractInput({ template, startDate, endDate }: Props) {
@@ -28,7 +35,7 @@ export function ContractInput({ template, startDate, endDate }: Props) {
 
   const lenderName = template.lenderName ?? "대여인(확인중)";
   const borrowerName = template.borrowerName ?? "차용인(확인중)";
-  const itemName = template.itemName ?? "물품명(확인중)";
+  const itemName = template.productName ?? "물품명(확인중)";
 
   return (
     <div className="flex flex-col w-full h-full px-8">

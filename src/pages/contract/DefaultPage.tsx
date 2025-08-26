@@ -1,32 +1,88 @@
-// src/pages/contract/DefaultPage.tsx
 import { HeaderWithoutSearch } from "@/components/common/Header";
 import { ContractInput } from "./components/ContractInput";
-import { useEffect, useState } from "react";
-import { getProductTemplate, postBorrowerApplication, ProductTemplateDTO } from "@/apis/contract";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getProductTemplate,
+  postBorrowerApplication,
+  ProductTemplateDTO,
+} from "@/apis/contract";
 
-// 하드코딩: productId = 1
-const PRODUCT_ID = 1;
+type ReservationData = {
+  productId: number;
+  startDate: string; // "YYYY-MM-DD"
+  startTime: string; // "HH:MM"
+  endDate: string;   // "YYYY-MM-DD"
+  endTime: string;   // "HH:MM"
+};
 
-// 분·초 00:00 ISO로 만드는 헬퍼 (UTC 기준)
-function toIsoAtMidnight(yyyy: number, mm: number, dd: number) {
-  const d = new Date(Date.UTC(yyyy, mm - 1, dd, 0, 0, 0));
-  return d.toISOString();
+// 모달이 저장한 예약 정보를 읽어온다.
+function readReservation(): ReservationData | null {
+  try {
+    const raw = localStorage.getItem("reservation");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // 최소 필드 검증
+    if (
+      typeof parsed?.productId === "number" &&
+      typeof parsed?.startDate === "string" &&
+      typeof parsed?.startTime === "string" &&
+      typeof parsed?.endDate === "string" &&
+      typeof parsed?.endTime === "string"
+    ) {
+      return parsed as ReservationData;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// 모달 포맷을 API 포맷으로 합친다. (YYYY-MM-DDTHH:MM:00)
+function toApiDateTime(date: string, time: string) {
+  // 분·초는 00 포맷 준수
+  const [hh, mm] = time.split(":");
+  const safeHH = hh?.padStart(2, "0") ?? "00";
+  const safeMM = mm?.padStart(2, "0") ?? "00";
+  return `${date}T${safeHH}:${safeMM}:00`;
 }
 
 export default function DefaultContractPage() {
-  // Borrower: 템플릿 표시 + 동의
   const [isChecked, setIsChecked] = useState(false);
   const [template, setTemplate] = useState<ProductTemplateDTO | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // 예약 시간 — 추후 컴포넌트 연동 예정(지금은 하드코딩)
-  const startDate = toIsoAtMidnight(2025, 8, 19);
-  const endDate = toIsoAtMidnight(2025, 8, 21);
+  // ✅ 예약정보(LocalStorage → ReserveModal이 저장해둔 값)
+  const reservation = useMemo(() => readReservation(), []);
+  const productId = reservation?.productId;
 
+  // ✅ Borrower 계약서에 보여줄 시작/종료 (모달 포맷을 그대로 합쳐 전달)
+  const startDateTime = useMemo(
+    () =>
+      reservation
+        ? toApiDateTime(reservation.startDate, reservation.startTime)
+        : "",
+    [reservation]
+  );
+  const endDateTime = useMemo(
+    () =>
+      reservation
+        ? toApiDateTime(reservation.endDate, reservation.endTime)
+        : "",
+    [reservation]
+  );
+
+  // 템플릿 조회
   useEffect(() => {
     (async () => {
+      if (!productId) {
+        setLoading(false);
+        alert("예약 정보가 없습니다. 상품 상세에서 다시 예약을 진행해 주세요.");
+        return;
+      }
       try {
-        const res = await getProductTemplate(PRODUCT_ID);
+        const res = await getProductTemplate(productId);
         setTemplate(res.data);
       } catch (e) {
         console.error("템플릿 조회 실패:", e);
@@ -35,18 +91,27 @@ export default function DefaultContractPage() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [productId]);
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsChecked(event.target.checked);
   };
 
   const handleCompleteClick = async () => {
-    // 시작/종료 동일 차단
-    if (startDate === endDate) {
-      alert("시작일과 종료일이 같으면 예약할 수 없습니다.");
+    if (!reservation || !productId) {
+      alert("예약 정보가 없습니다. 상품 상세에서 다시 예약을 진행해 주세요.");
       return;
     }
+
+    // 시작/종료 동일 차단 (날짜+시간 모두 일치)
+    if (
+      reservation.startDate === reservation.endDate &&
+      reservation.startTime === reservation.endTime
+    ) {
+      alert("시작과 종료가 같으면 예약할 수 없습니다.");
+      return;
+    }
+
     if (!isChecked) {
       alert("계약 내용에 동의해 주세요.");
       return;
@@ -54,12 +119,13 @@ export default function DefaultContractPage() {
 
     try {
       await postBorrowerApplication({
-        productId: PRODUCT_ID,
-        startDate,
-        endDate,
+        productId,
+        startDate: startDateTime,
+        endDate: endDateTime,
       });
+      localStorage.removeItem("reservation");
       alert("예약(동의)이 완료되었습니다. (서버에서 borrower-approval 자동 처리)");
-      // TODO: 라우팅 이동 등 후속 처리
+      navigate(`/product/${productId}`);
     } catch (error) {
       console.error("예약 처리 중 오류:", error);
       alert("예약 처리 중 문제가 발생했습니다.");
@@ -86,14 +152,21 @@ export default function DefaultContractPage() {
               템플릿을 불러오는 중...
             </div>
           ) : (
-            <ContractInput template={template} startDate={startDate} endDate={endDate} />
+            <ContractInput
+              template={template}
+              // 화면 표시는 날짜만 보이면 되지만, Borrower 컴포넌트는 전체 ISO를 받아 내부 포맷팅함
+              startDate={startDateTime}
+              endDate={endDateTime}
+            />
           )}
         </div>
       </div>
 
       <div className="flex flex-col items-center justify-start pt-4 z-50 h-[16.3%]">
         <label className="flex items-center cursor-pointer">
-          <span className="text-lg hover:scale-[101%]">계약서의 내용을 동의하시겠습니까?</span>
+          <span className="text-lg hover:scale-[101%]">
+            계약서의 내용을 동의하시겠습니까?
+          </span>
           <input
             type="checkbox"
             checked={isChecked}
