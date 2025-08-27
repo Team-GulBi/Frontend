@@ -256,7 +256,7 @@ export const ReserveModal = ({
       localStorage.setItem('reservation', JSON.stringify(reservation));
 
       setShowReservationForm(false);
-      navigate('/contract/input');
+      navigate(`/contract/borrow/${productId}`);
     } catch (error) {
       setToastMessage('다시 시도해주세요.');
       setToastType('error');
@@ -277,7 +277,7 @@ export const ReserveModal = ({
   };
 
   const handleContractClick = (applicationId: number) => {
-    navigate(`/contract/${applicationId}`);
+    navigate(`/contract/lend/${applicationId}`);
   };
 
   const sortedApplications =

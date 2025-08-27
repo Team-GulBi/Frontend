@@ -1,20 +1,26 @@
 import { HeaderWithoutSearch } from "@/components/common/Header";
 import { ContractCompleted, ContractCapture } from "./components/ContractCompleted";
 import { useState, useRef, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { getContractByApplicationId, putLenderApproval, ContractDTO } from "@/apis/contract";
 
 export default function CompletedContractPage() {
+  const navigate = useNavigate();
+  const { applicationId: applicationIdParam } = useParams();
+  const applicationId = applicationIdParam ? Number(applicationIdParam) : undefined;
+
   const [isChecked, setIsChecked] = useState(false);
   const contractRef = useRef<any>(null);
 
   const [contract, setContract] = useState<ContractDTO | null>(null);
   const [contractId, setContractId] = useState<number | null>(null);
 
-  // 임시 하드코딩 (추후 상위 컴포넌트에서 prop으로 전달 예정)
-  const applicationId = 1;
-
   useEffect(() => {
     const load = async () => {
+      if (!applicationId) {
+        alert("applicationId가 없습니다.");
+        return;
+      }
       try {
         const res = await getContractByApplicationId(applicationId);
         const dto = res.data;
@@ -49,27 +55,22 @@ export default function CompletedContractPage() {
       condition: contract.condition,
       notes: contract.notes,
 
-      // ✅ 시작/종료일 모두 전달 (상세주소 제거됨)
-      rentalStartDate: contract.rentalStartDate ?? contract.rentalEndDate, // 백엔드가 rentalStartDate 제공
-      rentalEndDate: fmt(contract.rentalEndDate),
+      rentalStartDate: contract.rentalStartDate ?? contract.rentalEndDate, // raw ISO
+      rentalEndDate: contract.rentalEndDate,                               // raw ISO
       rentalPlace: contract.rentalPlace,
       returnPlace: contract.returnPlace,
 
-      // 금액/비율
       rentalFee: contract.rentalFee,
       lateInterestRate: contract.lateInterestRate,
       latePenaltyRate: contract.latePenaltyRate,
       damageCompensationRate: contract.damageCompensationRate,
 
-      // 문서 하단 날짜(오늘)
       createdDate: fmt(new Date().toISOString()),
 
-      // 서명
       borrowerSignatureUrl: contract.borrowerSignature,
       lenderSignatureUrl: contract.lenderSignature,
       showLenderSignature: isChecked,
 
-      // 승인 상태(선택)
       lenderApproval: contract.lenderApproval,
       borrowerApproval: contract.borrowerApproval,
     };
@@ -87,9 +88,9 @@ export default function CompletedContractPage() {
         alert("계약서 캡처에 실패했습니다.");
         return;
       }
-
       await putLenderApproval({ contractId, file: blob, filename: "final_contract.png" });
       alert("계약이 승인되어 최종 계약서가 업로드되었습니다.");
+      navigate("/profile");
     } catch (e: any) {
       console.error("승인/업로드 실패:", e);
       alert("계약 승인 처리 중 문제가 발생했습니다.");
@@ -106,7 +107,7 @@ export default function CompletedContractPage() {
       <div className="flex flex-col w-[65%] h-[83.7%] justify-end items-center font-extrabold">
         <div
           className="flex w-full justify-center max-w-[82%] min-h-[84%] max-h-[84%] overflow-y-auto overflow-x-hidden rounded-[27.42px] transform transition duration-170 hover:scale-[1.01] z-0 py-10 px-5"
-          style={{ boxShadow: "0px 3.8px 10.5px 0 rgba(0,0,0,0.35)", scrollMarginLeft: "1000px" }}
+          style={{ boxShadow: "0px 3.8px 10.5px 0 rgba(0,0,0,0.35)" }}
         >
           <ContractCapture ref={contractRef}>
             {viewData ? (

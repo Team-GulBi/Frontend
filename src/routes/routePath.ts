@@ -16,8 +16,8 @@ const RoutePath = {
     Search: "/search",
 
     Contract: "/contract",
-    ContractInput: "/contract/Input",
-    ContractCompleted: "/contract/Completed",
+    ContractInput: "/contract/borrow/:productId",
+    ContractCompleted: "/contract/lend/:applicationId",
   } as const;
   
   export default RoutePath;

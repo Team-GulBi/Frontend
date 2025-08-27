@@ -39,13 +39,20 @@ interface ContractProps {
 }
 
 const fmt = (iso?: string) => {
-  if (!iso) return "";
+  if (!iso) return "-";
   const d = new Date(iso);
   return d
-    .toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
-    .replace(/\./g, "-")
-    .replace(/ /g, "")
-    .replace(/-$/, "");
+    .toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+    .replace(/\./g, ".")
+    .replace(/-\s*(?=\d{2}:)/, " ") 
+    .replace(/-+$/, ""); 
 };
 
 export const ContractCompleted = ({
