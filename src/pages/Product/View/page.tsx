@@ -275,9 +275,6 @@ const ProductViewPage = () => {
         <div className="mx-[30px] mb-[25px] flex justify-end space-x-6">
           <NavigateButton onClick={handleNavigatePage}>채팅하기</NavigateButton>
           <NavigateButton onClick={handleReserve}>예약하기</NavigateButton>
-          <NavigateButton onClick={handleNavigatePage}>
-            계약서 작성하기
-          </NavigateButton>
         </div>
 
         <div className="mb-7 border-b py-[10px]">
