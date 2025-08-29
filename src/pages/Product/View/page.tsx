@@ -10,14 +10,13 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { HeaderWithoutSearch } from '@/components/common/Header';
-import { ReadyToRentChip } from '@/components/common/ProductStatusChip';
 import { NavigateButton } from '@/components/Product/Button/NavigateButton';
 import { ProductRelatedButton } from '@/components/Product/Button/ProductRelatedButton';
 import { ReactComponent as RightArray } from '@/assets/svgs/rightarray.svg';
 import useGetProductDetail from '@/hooks/queries/useGetProductDetail';
 import useSeperateTags from '@/hooks/utils/useSeperateTags';
 import { useDeleteProduct } from '@/hooks/mutations';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DeleteModal } from '@/components/common/DeleteModal';
 import { ReserveModal } from '@/components/Product/ReserveModal';
 
@@ -30,6 +29,10 @@ const ProductViewPage = () => {
   const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
 
   const tagList = useSeperateTags(data?.data?.tag || '');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleNavigatePage = () => {
     navigate('/');
@@ -56,7 +59,39 @@ const ProductViewPage = () => {
     });
   };
 
-  if (isLoading || isPending) return <div>로딩 중...</div>;
+  if (isLoading || isPending) {
+    return (
+      <div className="min-h-screen flex w-screen flex-col">
+        <HeaderWithoutSearch />
+        <div className="flex h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="mb-8">
+              <div className="flex justify-center space-x-[6px]">
+                <div
+                  className="h-5 w-5 animate-ping rounded-full bg-secondary-100"
+                  style={{ animationDelay: '0s' }}
+                ></div>
+                <div
+                  className="h-5 w-5 animate-ping rounded-full bg-secondary-100"
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
+                <div
+                  className="h-5 w-5 animate-ping rounded-full bg-secondary-100"
+                  style={{ animationDelay: '0.4s' }}
+                ></div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-large22 font-semibold text-neutral-0">
+                상품 정보를 불러오는 중이에요!
+              </p>
+              <p className="text-neutral-40">잠시만 기다려주세요</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex w-screen pb-[133px]">
@@ -100,7 +135,6 @@ const ProductViewPage = () => {
               </span>
             </div>
             <div className="flex items-center space-x-2 text-small16 text-neutral-40">
-              <ReadyToRentChip />
               <span>{data?.data?.productCategories?.bigName}</span>
               <RightArray />
               <span>{data?.data?.productCategories?.midName}</span>

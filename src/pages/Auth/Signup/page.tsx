@@ -6,6 +6,7 @@ import { useSignupValidation } from '@/hooks/utils/useSignupValidation';
 import signup from '@/apis/signup';
 import { useNavigate } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
+import { Toast } from '@/components/common/Toast';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -17,6 +18,10 @@ const SignupPage = () => {
     phone: '',
     signature: false,
   });
+
+  const [toastMessage, setToastMessage] = useState('');
+  const [isToastVisible, setIsToastVisible] = useState(false);
+  const [toastType, setToastType] = useState<'error' | 'success'>('error');
 
   const sigCanvas = useRef<SignatureCanvas>(null);
   const clearSignature = () => {
@@ -82,14 +87,32 @@ const SignupPage = () => {
       };
 
       await signup(requestData);
-      navigate('/login');
+
+      setToastMessage('회원가입 진행중이에요!');
+      setToastType('success');
+      setIsToastVisible(true);
+
+      setTimeout(() => {
+        setIsToastVisible(false);
+        navigate('/login');
+      }, 2000);
     } catch (error) {
       console.error('회원가입 실패', error);
+
+      setToastMessage('회원가입에 실패했습니다. 다시 시도해주세요.');
+      setToastType('error');
+      setIsToastVisible(true);
     }
   };
 
   return (
     <div className="min-h-screen flex w-screen">
+      <Toast
+        message={toastMessage}
+        isVisible={isToastVisible}
+        onClose={() => {}}
+        type={toastType}
+      />
       <LoginHeader />
       <div className="flex w-full items-center justify-center gap-[10rem] px-[18rem]">
         <div className="my-[8rem] flex flex-col gap-[1.5rem]">
