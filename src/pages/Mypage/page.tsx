@@ -7,13 +7,15 @@ import { ProductCard } from '@/components/common/ProductCard';
 import { HeaderWithSearch } from '@/components/common/Header';
 import { ReserveModal } from '@/components/Product/ReserveModal';
 import { useGetUserProducts } from '@/hooks/queries/useGetUserProducts';
-
+import  MyContractModal  from '@/components/contract/MyContract';
+import { FilePenLine } from "lucide-react";
 const MyPage = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isReserveModalOpen, setIsReserveModalOpen] = useState<boolean>(false);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null,
   );
+  const [isContractModalOpen, setIsContractModalOpen] = useState<boolean>(false);
 
   const {
     data: userProductsData,
@@ -76,6 +78,14 @@ const MyPage = () => {
                   </p>
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+              <button
+                  onClick={() => setIsContractModalOpen(true)}
+                  className="flex items-center gap-2 rounded-lg bg-primary-100 px-4 py-2 text-white transition-colors duration-200 hover:opacity-90"
+                >
+                  <FilePenLine />
+                  <span className="text-xsmall14 font-semibold">내 계약</span>
+                </button>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 transition-colors duration-200 hover:bg-gray-200"
@@ -85,7 +95,7 @@ const MyPage = () => {
               </button>
             </div>
           </div>
-
+          </div>
           {isModalOpen && (
             <ProfileModifyModal setIsModalOpen={setIsModalOpen} />
           )}
@@ -190,6 +200,11 @@ const MyPage = () => {
           }}
         />
       )}
+      <MyContractModal
+        isOpen={isContractModalOpen}
+        onClose={() => setIsContractModalOpen(false)}
+      />
+
     </div>
   );
 };
