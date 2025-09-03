@@ -155,12 +155,12 @@ export const ContractCompleted = ({
         {" "}으로 한다.
       </p>
       <p className="mt-1">
-        ② 차용인이 임대료 지급을 지체한 경우, 지연 이자율{" "}
+        ② 차용인이 약정된 기일을 초과하여 임대료 지급을 지체한 경우, 지연 이자율{" "}
         <strong><span className="underline underline-offset-2">{lateInterestRate}%</span></strong>
         {" "}를 적용한다.
       </p>
       <p className="mt-1">
-        ③ 차용인이 반납을 지체한 경우, 지연 손해금{" "}
+        ③ 차용인이 약정된 반납일을 지체한 경우, 지연 손해금{" "}
         <strong><span className="underline underline-offset-2">{latePenaltyRate}%</span></strong>
         {" "}를 적용한다.
       </p>
@@ -168,14 +168,20 @@ export const ContractCompleted = ({
       {/* 손상/배상 */}
       <h2 className="text-2xl font-semibold mt-6 mb-4">제 4조 (위험부담 및 면책)</h2>
       <p>
-        ① 차용인의 귀책으로 물품에 파손·훼손·멸실이 발생한 경우, 차용인은 신품가의{" "}
+        ① 차용인의 귀책사유로 물품에 파손·훼손·멸실이 발생한 경우, 차용인은 신품가의{" "}
         <strong><span className="underline underline-offset-2">{damageCompensationRate}%</span></strong>
         {" "}에 해당하는 금액을 배상한다.
       </p>
       <p className="mt-1">
         ② 천재지변, 사변, 국가 비상사태 등 불가항력 사유로 발생한 손해에 대해서는 배상책임을 면한다.
       </p>
-
+      
+      <h2 className="text-2xl font-semibold mt-6 mb-2">제 5조 (기타)</h2>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>본 계약에 명시되지 않은 사항은 관계 법령 및 일반 상관례를 따른다.</li>
+        <li>필요 시 대여인과 차용인은 상호 합의하여 별도의 특약을 추가할 수 있다.</li>
+      </ul>
+      
       {/* 날짜 */}
       <p className="mt-6 font-bold text-center">
         <span className="underline underline-offset-2">{createdDate}</span>
