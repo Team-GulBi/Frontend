@@ -8,11 +8,11 @@ type UserRole = "lender" | "borrower";
 interface ContractItem {
   id: number;
   title: string;        // 상품게시물제목 or 상품이름
-  counterpart: string;  // 상대방 이름
-  role: UserRole;       // 내 역할 lender or borrower --> isOwner boolean이 더 직관적일수도
+  counterpart: string;  // 상대방 이름. 없어도될듯?
+  role: UserRole;       // 내 역할 lender or borrower --> isOwner boolean이 더 직관적일수도 false->borrower true->lender
   startedAt: string;    // 생성일 -> startDate??
   updatedAt: string;    // 최근 업데이트 -> endDate로 대체?
-  status: ContractStatus; // 상품예약쪽 상태와 맞출 필요있음
+  status: ContractStatus; // 상품예약쪽 상태와 맞춰야함
 }
 
 interface MyContractModalProps {
@@ -95,7 +95,7 @@ export default function MyContractModal({ isOpen, onClose }: MyContractModalProp
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-                <div className="space-y-0.5">
+                <div className="flex flex-col items-center w-full space-y-0.5">
                   <h3 className="text-2xl font-bold text-gray-900">내 계약</h3>
                   <p className="text-sm text-gray-500">
                     진행중 · 완료된 계약을 한 곳에서 확인하세요
