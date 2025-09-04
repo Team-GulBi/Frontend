@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 type ContractStatus = "IN_PROGRESS" | "COMPLETED";
 type UserRole = "lender" | "borrower";
 
 interface ContractItem {
   id: number;
-  title: string;        // 계약/상품 제목
+  title: string;        // 상품게시물제목 or 상품이름
   counterpart: string;  // 상대방 이름
-  role: UserRole;       // 내 역할
-  startedAt: string;    // 생성일
-  updatedAt: string;    // 최근 업데이트
-  status: ContractStatus;
+  role: UserRole;       // 내 역할 lender or borrower --> isOwner boolean이 더 직관적일수도
+  startedAt: string;    // 생성일 -> startDate??
+  updatedAt: string;    // 최근 업데이트 -> endDate로 대체?
+  status: ContractStatus; // 상품예약쪽 상태와 맞출 필요있음
 }
 
 interface MyContractModalProps {
@@ -39,8 +40,7 @@ type TabKey = typeof tabs[number]["key"];
 export default function MyContractModal({ isOpen, onClose }: MyContractModalProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("ALL");
   const [query, setQuery] = useState("");
-
-  // ESC로 닫기
+    // ESC로 닫기
   useEffect(() => {
     if (!isOpen) return;
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -67,7 +67,7 @@ export default function MyContractModal({ isOpen, onClose }: MyContractModalProp
         c.counterpart.toLowerCase().includes(q)
     );
   }, [activeTab, query]);
-
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -185,6 +185,7 @@ export default function MyContractModal({ isOpen, onClose }: MyContractModalProp
 }
 
 function ContractCard({ item }: { item: ContractItem }) {
+  const navigate = useNavigate();
   const statusStyle =
     item.status === "IN_PROGRESS"
       ? "bg-amber-100 text-amber-700"
@@ -194,7 +195,9 @@ function ContractCard({ item }: { item: ContractItem }) {
     item.role === "lender"
       ? "bg-secondary-90 text-white"
       : "bg-primary-100 text-white";
-
+  const handleContractClick = () => {
+    navigate(`/contract/lend/${item.id}`)
+  };
   return (
     <motion.div
       layout
@@ -231,17 +234,16 @@ function ContractCard({ item }: { item: ContractItem }) {
       <div className="mt-4 flex items-center gap-2">
         <button
           className="flex-1 rounded-xl bg-secondary-90 px-3 py-2 text-sm font-semibold text-white transition hover:scale-[1.02] hover:bg-secondary-80"
-          // 퍼블리싱 단계: 아직 기능 없음
-          onClick={() => {}}
+          onClick={handleContractClick}
         >
           계약서 확인
         </button>
         <button
           className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-          onClick={() => {}}
+          onClick={() => {}} //굳이 필요할까??
         >
           상세
-        </button>
+        </button> 
       </div>
     </motion.div>
   );
